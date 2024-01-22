@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+def login_page(request):
+
+    template = ""
+
+    return render(request, template, {})
