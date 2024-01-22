@@ -17,6 +17,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 USERS_APP_TEMPLATES = os.path.join(BASE_DIR, "users_app", "templates")
+CALCULATOR_APP_TEMPLATES = os.path.join(BASE_DIR, "calculator_app", "templates")
 
 
 # Quick-start development settings - unsuitable for production
@@ -40,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users_app'
+    'users_app',
+    'calculator_app',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'nutritional_values_calculator.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [USERS_APP_TEMPLATES],
+        'DIRS': [USERS_APP_TEMPLATES, CALCULATOR_APP_TEMPLATES],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+def calculator_page(request):
+
+    template = "calculator.html"
+
+    return render(request, template, {})

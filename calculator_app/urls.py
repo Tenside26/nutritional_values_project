@@ -1,6 +1,5 @@
 from django.urls import path
-from .view import calculator_page
-
+from . import views
 
 
 urlpatterns = [
