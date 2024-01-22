@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import UserLoginForm
+from .forms import UserLoginForm, UserRegisterForm
 
 def login_page(request):
 
@@ -11,6 +11,6 @@ def login_page(request):
 def register_page(request):
 
     template = "register.html"
-    form = ""
+    form = UserRegisterForm
 
     return render(request, template, {"form": form})
