@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import UserLoginForm, UserRegisterForm
+from django.contrib import messages
 
 def login_page(request):
 
@@ -18,6 +19,9 @@ def register_page(request):
 
         if form.is_valid():
             form.save()
+            messages.success(request, 'Your account has been successfully created!')
             return redirect("login")
+        else:
+            form = UserRegisterForm()
 
     return render(request, template, {"form": form})
