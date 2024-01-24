@@ -29,6 +29,24 @@ class UserLoginFormTests(TestCase):
 
         self.assertFalse(form.is_valid())
 
+    def test_wrong_username(self):
+        form_data = {'username': 'wrong_user',
+                     'password': 'test_password'}
+
+        form = UserLoginForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Invalid username or password', form.errors['__all__'])
+
+    def test_wrong_password(self):
+        form_data = {'username': 'test_user',
+                     'password': 'wrong_password'}
+
+        form = UserLoginForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Invalid username or password', form.errors['__all__'])
+
     def test_missing_username(self):
         form_data = {'password': 'test_password'}
         form = UserLoginForm(data=form_data)
@@ -42,5 +60,12 @@ class UserLoginFormTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['password'], ['This field is required.'])
+
+    def test_missing_data(self):
+        form_data = {}
+        form = UserLoginForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+
 
 

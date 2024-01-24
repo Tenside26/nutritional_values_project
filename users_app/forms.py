@@ -10,12 +10,11 @@ class UserLoginForm(forms.Form):
     def clean(self):
         username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
+
         if username and password:
             user = authenticate(username=username, password=password)
-            if not user:
-                raise forms.ValidationError("Username does not exists")
-            if not user.check_password(password):
-                raise forms.ValidationError("Wrong Password")
+            if not user or not user.check_password(password):
+                raise forms.ValidationError("Invalid username or password")
 
 
 class UserRegisterForm(UserCreationForm):
