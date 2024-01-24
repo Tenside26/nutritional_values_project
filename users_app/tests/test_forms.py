@@ -81,7 +81,6 @@ class UserLoginFormTests(TestCase):
 
 
 class UserRegisterFormTests(TestCase):
-        # not matching password1 with password2,
 
     def setUp(self):
         self.test_user = User.objects.create_user(
@@ -153,4 +152,53 @@ class UserRegisterFormTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('Passwords do not match', form.errors.get('password1', ['Passwords do not match']))
+
+    def test_register_missing_username(self):
+        form_data = {'password1': 'test_password',
+                     'password2': 'test_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last',
+                     'email': 'testuser@example.com'}
+
+        form = UserRegisterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['username'], ['This field is required.'])
+
+    def test_register_missing_password1(self):
+        form_data = {'username': 'test_user',
+                     'password2': 'test_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last',
+                     'email': 'testuser@example.com'}
+
+        form = UserRegisterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['password1'], ['This field is required.'])
+
+    def test_register_missing_password2(self):
+        form_data = {'username': 'test_user',
+                     'password1': 'test_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last',
+                     'email': 'testuser@example.com'}
+
+        form = UserRegisterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['password2'], ['This field is required.'])
+
+    def test_register_missing_email(self):
+        form_data = {'username': 'test_user',
+                     'password1': 'test_password',
+                     'password2': 'test_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last'}
+
+        form = UserRegisterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['email'], ['This field is required.'])
+
 
