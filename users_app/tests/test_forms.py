@@ -2,6 +2,7 @@
 from django.test import TestCase, Client
 from users_app.forms import UserLoginForm, UserRegisterForm
 from users_app.models import CustomUser
+from django.urls import reverse
 
 
 class UserLoginFormTests(TestCase):
@@ -90,6 +91,7 @@ class UserRegisterFormTests(TestCase):
             last_name='existing_last',
             email='existing@example.com'
         )
+        self.register_url = reverse('register')
 
     def tearDown(self):
         self.test_user.delete()
@@ -201,4 +203,17 @@ class UserRegisterFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['email'], ['This field is required.'])
 
+    def test_register_user_created_successfully(self):
+        form_data = {'username': 'test_user',
+                     'password1': 'test_password',
+                     'password2': 'test_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last',
+                     'email': 'testuser@example.com'}
+
+        response = self.client.post(self.register_url, form_data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('login'))
+        self.assertTrue(CustomUser.objects.filter(username='test_user').exists())
 
