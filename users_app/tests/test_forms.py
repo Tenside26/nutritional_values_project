@@ -141,3 +141,16 @@ class UserRegisterFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('Username already taken', form.errors.get('username', []))
 
+    def test_register_password_mismatch(self):
+        form_data = {'username': 'test_user',
+                     'password1': 'test_password',
+                     'password2': 'wrong_password',
+                     'first_name': 'test_first',
+                     'last_name': 'test_last',
+                     'email': 'testuser@example.com'}
+
+        form = UserRegisterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Passwords do not match', form.errors.get('password1', ['Passwords do not match']))
+
