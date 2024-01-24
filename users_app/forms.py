@@ -45,3 +45,4 @@ class UserRegisterForm(UserCreationForm):
             del cleaned_data['password1']
 
         return cleaned_data
+
