@@ -1,13 +1,13 @@
 
 from django.test import TestCase, Client
 from users_app.forms import UserLoginForm, UserRegisterForm
-from django.contrib.auth.models import User
+from users_app.models import CustomUser
 
 
 class UserLoginFormTests(TestCase):
 
     def setUp(self):
-        self.test_user = User.objects.create_user(
+        self.test_user = CustomUser.objects.create_user(
             username='test_user',
             password='test_password',
         )
@@ -75,7 +75,7 @@ class UserLoginFormTests(TestCase):
         self.assertIn('_auth_user_id', self.client.session)
 
         user_id = self.client.session['_auth_user_id']
-        logged_in_user = User.objects.get(id=user_id)
+        logged_in_user = CustomUser.objects.get(id=user_id)
 
         self.assertEqual(logged_in_user, self.test_user)
 
@@ -83,7 +83,7 @@ class UserLoginFormTests(TestCase):
 class UserRegisterFormTests(TestCase):
 
     def setUp(self):
-        self.test_user = User.objects.create_user(
+        self.test_user = CustomUser.objects.create_user(
             username='existing_user',
             password='existing_password',
             first_name='existing_first',
