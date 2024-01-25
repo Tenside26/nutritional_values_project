@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users_app',
     'calculator_app',
     'rest_framework',
+    'api_app',
 ]
 
 MIDDLEWARE = [
