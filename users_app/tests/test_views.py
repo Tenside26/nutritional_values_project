@@ -1,7 +1,7 @@
 from django.test import TestCase
 from users_app.models import CustomUser
 from django.urls import reverse
-
+from users_app.forms import UserLoginForm
 
 
 class LoginPageTest(TestCase):
@@ -12,22 +12,32 @@ class LoginPageTest(TestCase):
     def tearDown(self):
         self.user.delete()
 
-    def test_login_page_successful(self):
-        data = {'username': 'test_user', 'password': 'test_password'}
-        response = self.client.post(self.login_url, data)
-
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('calculator'))
-
-    def test_login_page_unsuccessful(self):
-        data = {'username': 'test_user', 'password': 'wrong_password'}
-        response = self.client.post(self.login_url, data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Invalid username or password')
-
     def test_login_page_template_render_correctly(self):
         response = self.client.get(self.login_url)
 
         self.assertTemplateUsed(response,'login.html')
 
+    def test_login_page_renders_correct_form(self):
+        response = self.client.get(self.login_url)
+
+        self.assertIsInstance(response.context['form'], UserLoginForm)
+        self.assertContains(response, '<form method="post" action="{}">'.format(self.login_url), html=True)
+        self.assertContains(response, 'csrfmiddlewaretoken', html=True)
+
+
+class RegisterPageTest(TestCase):
+    def setUp(self):
+        self.register_url = reverse('register')
+        self.user = CustomUser.objects.create_user(username='test_user',
+                                                   password='test_password',
+                                                   first_name='test_first',
+                                                   last_name='test_last',
+                                                   email='test@example.com')
+
+    def tearDown(self):
+        self.user.delete()
+
+    def test_register_page_template_render_correctly(self):
+        response = self.client.get(self.register_url)
+
+        self.assertTemplateUsed(response,'register.html')

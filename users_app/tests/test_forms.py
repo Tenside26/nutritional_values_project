@@ -73,6 +73,7 @@ class UserLoginFormTests(TestCase):
         response = self.client.post('', form_data, follow=True)
 
         self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse('calculator'))
         self.assertIn('_auth_user_id', self.client.session)
 
         user_id = self.client.session['_auth_user_id']
