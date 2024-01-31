@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'calculator_app',
     'rest_framework',
     'api_app',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
