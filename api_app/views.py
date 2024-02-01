@@ -1,6 +1,6 @@
 from calculator_app.models import Product
 from rest_framework import generics
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from users_app.models import CustomUser
 from .serializers import CustomUserSerializer, ProductSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -28,5 +28,10 @@ class ProductDetailView(RetrieveAPIView):
 
 
 class ProductUpdateView(UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+class ProductDestroyView(DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
