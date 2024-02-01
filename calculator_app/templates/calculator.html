@@ -6,8 +6,9 @@
 </head>
 <body>
   <h1>Calculator Page</h1>
-  {% for data in api_data %}
-    <p>{{ data }}</p>
+  {% for data in api_data.results %}
+    <p>{{ data.name }}</p>
+    <p>{{ data.calories }}</p>
   {% endfor %}
 </body>
 </html>

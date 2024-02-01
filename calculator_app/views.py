@@ -6,7 +6,7 @@ import requests
 def calculator_page(request):
 
     template = "calculator.html"
-    api_url = "https://jsonplaceholder.typicode.com/posts"
+    api_url = "http://127.0.0.1:8000/api/products-list"
 
     try:
         response = requests.get(api_url)
@@ -15,6 +15,8 @@ def calculator_page(request):
             api_data = response.json()
 
             return render(request, template, {'api_data': api_data})
+        else:
+            return HttpResponseServerError(f"Error fetching data from API. Status code: {response.status_code}")
 
     except requests.exceptions.RequestException as e:
 
