@@ -2,15 +2,17 @@
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
+from rest_framework import status
 from users_app.models import CustomUser
 from faker import Faker
+from api_app.serializers import CustomUserSerializer
 
 
 class CustomUserListViewTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse('user-list')
+        self.url = reverse('api-users-list')
         self.fake = Faker()
 
         self.first_user_data = {
@@ -38,3 +40,11 @@ class CustomUserListViewTests(TestCase):
             CustomUser.objects.filter(pk=self.second_user.pk).delete()
 
         super().tearDown()
+
+    def test_user_list_api_view_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_users = CustomUser.objects.all()
+        serialized_data = CustomUserSerializer(expected_users, many=True).data
+        self.assertEqual(response.data, serialized_data)
