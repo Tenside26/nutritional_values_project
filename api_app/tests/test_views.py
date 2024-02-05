@@ -13,10 +13,6 @@ class CustomUserViewsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.list_url = reverse('api-users-list')
-        self.detail_url = reverse('api-user-detail')
-        self.create_url = reverse('api-user-create')
-        self.update_url = reverse('api-user-update')
-        self.destroy_url = reverse('api-user-destroy')
         self.fake = Faker()
 
         self.first_user_data = {
@@ -51,4 +47,13 @@ class CustomUserViewsTests(TestCase):
 
         expected_users = CustomUser.objects.all()
         serialized_data = CustomUserSerializer(expected_users, many=True).data
+        self.assertEqual(response.data, serialized_data)
+
+    def test_user_detail_api_view_get(self):
+        detail_url = reverse('api-user-detail', args=[self.first_user.pk])
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_users = CustomUser.objects.get(pk=self.first_user.pk)
+        serialized_data = CustomUserSerializer(expected_users).data
         self.assertEqual(response.data, serialized_data)

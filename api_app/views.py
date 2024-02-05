@@ -15,10 +15,9 @@ class CustomUserPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 
-class CustomUserListView(ListAPIView):
+class CustomUserListView(ListAPIView):  # Add Pagination
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = CustomUserPageNumberPagination
 
 
 class CustomUserDetailView(RetrieveAPIView):
