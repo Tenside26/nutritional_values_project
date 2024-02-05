@@ -26,8 +26,10 @@ class CustomUserSerializerTests(TestCase):
     def tearDown(self):
         if self.user_instance:
             self.user_instance.delete()
+
         if hasattr(self, 'created_instance'):
             self.created_instance.delete()
+
         super().tearDown()
 
     def test_user_serialization(self):
