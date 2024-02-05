@@ -55,7 +55,7 @@ class CustomUserSerializerTests(TestCase):
     def test_user_serialization_wrong_username(self):
         serialized_data = self.serializer.data
 
-        self.assertNotEqual(serialized_data['username'],  "wrong_username")
+        self.assertNotEqual(serialized_data['username'],  self.fake.user_name())
         self.assertEqual(serialized_data['first_name'], self.user_data['first_name'])
         self.assertEqual(serialized_data['last_name'], self.user_data['last_name'])
         self.assertEqual(serialized_data['email'], self.user_data['email'])
@@ -64,7 +64,7 @@ class CustomUserSerializerTests(TestCase):
         serialized_data = self.serializer.data
 
         self.assertEqual(serialized_data['username'], self.user_data['username'])
-        self.assertNotEqual(serialized_data['first_name'],  "wrong_first_name")
+        self.assertNotEqual(serialized_data['first_name'],  self.fake.first_name())
         self.assertEqual(serialized_data['last_name'], self.user_data['last_name'])
         self.assertEqual(serialized_data['email'], self.user_data['email'])
 
@@ -73,7 +73,7 @@ class CustomUserSerializerTests(TestCase):
 
         self.assertEqual(serialized_data['username'], self.user_data['username'])
         self.assertEqual(serialized_data['first_name'], self.user_data['first_name'])
-        self.assertNotEqual(serialized_data['last_name'],  "wrong_last_name")
+        self.assertNotEqual(serialized_data['last_name'],  self.fake.last_name())
         self.assertEqual(serialized_data['email'], self.user_data['email'])
 
     def test_user_serialization_wrong_email(self):
@@ -82,4 +82,13 @@ class CustomUserSerializerTests(TestCase):
         self.assertEqual(serialized_data['username'], self.user_data['username'])
         self.assertEqual(serialized_data['first_name'], self.user_data['first_name'])
         self.assertEqual(serialized_data['last_name'], self.user_data['last_name'])
-        self.assertNotEqual(serialized_data['email'], "wrong_email@.example.com")
+        self.assertNotEqual(serialized_data['email'], self.fake.email())
+
+    def test_user_serialization_missing_data(self):
+        serialized_data = CustomUserSerializer(data={})
+
+        self.assertFalse(serialized_data.is_valid())
+        self.assertIsNone(serialized_data.validated_data.get('username'))
+        self.assertIsNone(serialized_data.validated_data.get('first_name'))
+        self.assertIsNone(serialized_data.validated_data.get('last_name'))
+        self.assertIsNone(serialized_data.validated_data.get('email'))
