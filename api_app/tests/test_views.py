@@ -8,11 +8,15 @@ from faker import Faker
 from api_app.serializers import CustomUserSerializer
 
 
-class CustomUserListViewTests(TestCase):
+class CustomUserViewsTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse('api-users-list')
+        self.list_url = reverse('api-users-list')
+        self.detail_url = reverse('api-user-detail')
+        self.create_url = reverse('api-user-create')
+        self.update_url = reverse('api-user-update')
+        self.destroy_url = reverse('api-user-destroy')
         self.fake = Faker()
 
         self.first_user_data = {
@@ -42,7 +46,7 @@ class CustomUserListViewTests(TestCase):
         super().tearDown()
 
     def test_user_list_api_view_get(self):
-        response = self.client.get(self.url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected_users = CustomUser.objects.all()
