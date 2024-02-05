@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password
+
 from django.test import TestCase, Client
 from users_app.forms import UserLoginForm, UserRegisterForm
 from users_app.models import CustomUser
@@ -109,7 +109,8 @@ class UserRegisterFormTests(TestCase):
         self.register_url = reverse('register')
 
     def tearDown(self):
-        self.test_user.delete()
+        if self.test_user:
+            self.test_user.delete()
         super().tearDown()
 
     def test_register_valid_data(self):
