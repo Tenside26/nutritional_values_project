@@ -8,11 +8,8 @@ class CustomUserSerializerTests(TestCase):
 
     def setUp(self):
         self.fake = Faker()
-        new_password = self.fake.password(length=40)
         self.user_data = {
             'username': self.fake.user_name(),
-            'password1': new_password,
-            'password2': new_password,
             'first_name': self.fake.first_name(),
             'last_name': self.fake.last_name(),
             'email': self.fake.email(),
@@ -25,3 +22,10 @@ class CustomUserSerializerTests(TestCase):
             self.user_instance.delete()
         super().tearDown()
 
+    def test_user_serialization(self):
+        serialized_data = self.serializer.data
+
+        self.assertEqual(serialized_data['username'], self.user_data['username'])
+        self.assertEqual(serialized_data['first_name'], self.user_data['first_name'])
+        self.assertEqual(serialized_data['last_name'], self.user_data['last_name'])
+        self.assertEqual(serialized_data['email'], self.user_data['email'])
