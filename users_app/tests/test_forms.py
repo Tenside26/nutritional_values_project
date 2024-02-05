@@ -1,38 +1,47 @@
-
+from django.contrib.auth.hashers import make_password
 from django.test import TestCase, Client
 from users_app.forms import UserLoginForm, UserRegisterForm
 from users_app.models import CustomUser
 from django.urls import reverse
+from faker import Faker
 
 
 class UserLoginFormTests(TestCase):
 
     def setUp(self):
+        self.fake = Faker()
         self.test_user = CustomUser.objects.create_user(
-            username='test_user',
-            password='test_password',
+            username=self.fake.user_name(),
+            password=self.fake.password(length=40),
         )
         self.client = Client()
 
     def tearDown(self):
-        self.test_user.delete()
+        if self.test_user:
+            self.test_user.delete()
         super().tearDown()
 
     def test_login_valid_data(self):
-        form_data = {'username': 'test_user', 'password': 'test_password'}
+        form_data = {'username': self.test_user.username,
+                     'password': self.test_user.password}
+
         form = UserLoginForm(data=form_data)
+        if not form.is_valid():
+            print(form.errors)
 
         self.assertTrue(form.is_valid())
 
     def test_login_invalid_data(self):
-        form_data = {'username': 'invalid_user', 'password': 'invalid_password'}
+        form_data = {'username': 'invalid_user',
+                     'password': 'invalid_password'}
+
         form = UserLoginForm(data=form_data)
 
         self.assertFalse(form.is_valid())
 
     def test_login_wrong_username(self):
         form_data = {'username': 'wrong_user',
-                     'password': 'test_password'}
+                     'password': self.test_user.password}
 
         form = UserLoginForm(data=form_data)
 
@@ -40,7 +49,7 @@ class UserLoginFormTests(TestCase):
         self.assertIn('Invalid username or password', form.errors['__all__'])
 
     def test_login_wrong_password(self):
-        form_data = {'username': 'test_user',
+        form_data = {'username': self.test_user.username,
                      'password': 'wrong_password'}
 
         form = UserLoginForm(data=form_data)
@@ -49,14 +58,16 @@ class UserLoginFormTests(TestCase):
         self.assertIn('Invalid username or password', form.errors['__all__'])
 
     def test_login_missing_username(self):
-        form_data = {'password': 'test_password'}
+        form_data = {'password': self.test_user.password}
+
         form = UserLoginForm(data=form_data)
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['username'], ['This field is required.'])
 
     def test_login_missing_password(self):
-        form_data = {'username': 'test_user'}
+        form_data = {'username': self.test_user.username}
+
         form = UserLoginForm(data=form_data)
 
         self.assertFalse(form.is_valid())
@@ -69,7 +80,9 @@ class UserLoginFormTests(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_login_successful_login(self):
-        form_data = {'username': 'test_user', 'password': 'test_password'}
+        form_data = {'username': self.test_user.username,
+                     'password': self.test_user.password}
+
         response = self.client.post('', form_data, follow=True)
 
         self.assertEqual(response.status_code, 200)
@@ -85,6 +98,7 @@ class UserLoginFormTests(TestCase):
 class UserRegisterFormTests(TestCase):
 
     def setUp(self):
+        self.fake = Faker()
         self.test_user = CustomUser.objects.create_user(
             username='existing_user',
             password='existing_password',
@@ -99,12 +113,13 @@ class UserRegisterFormTests(TestCase):
         super().tearDown()
 
     def test_register_valid_data(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+        new_password = self.fake.password(length=40)
+        form_data = {'username': self.fake.user_name(),
+                     'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -118,11 +133,12 @@ class UserRegisterFormTests(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_register_taken_email(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
+        new_password = self.fake.password(length=40)
+        form_data = {'username': self.fake.user_name(),
+                     'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
                      'email': 'existing@example.com'}
 
         form = UserRegisterForm(data=form_data)
@@ -131,12 +147,13 @@ class UserRegisterFormTests(TestCase):
         self.assertIn('Email already in use', form.errors.get('email', []))
 
     def test_register_taken_username(self):
+        new_password = self.fake.password(length=40)
         form_data = {'username': 'existing_user',
-                     'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+                     'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -144,12 +161,12 @@ class UserRegisterFormTests(TestCase):
         self.assertIn('Username already taken', form.errors.get('username', []))
 
     def test_register_password_mismatch(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
+        form_data = {'username': self.fake.user_name(),
+                     'password1': self.fake.password(length=40),
                      'password2': 'wrong_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -157,11 +174,12 @@ class UserRegisterFormTests(TestCase):
         self.assertIn('Passwords do not match', form.errors.get('password1', ['Passwords do not match']))
 
     def test_register_missing_username(self):
-        form_data = {'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+        new_password = self.fake.password(length=40)
+        form_data = {'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -169,11 +187,11 @@ class UserRegisterFormTests(TestCase):
         self.assertEqual(form.errors['username'], ['This field is required.'])
 
     def test_register_missing_password1(self):
-        form_data = {'username': 'test_user',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+        form_data = {'username': self.fake.user_name(),
+                     'password2': self.fake.password(length=40),
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -181,11 +199,11 @@ class UserRegisterFormTests(TestCase):
         self.assertEqual(form.errors['password1'], ['This field is required.'])
 
     def test_register_missing_password2(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+        form_data = {'username': self.fake.user_name(),
+                     'password1': self.fake.password(length=40),
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -193,11 +211,12 @@ class UserRegisterFormTests(TestCase):
         self.assertEqual(form.errors['password2'], ['This field is required.'])
 
     def test_register_missing_email(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last'}
+        new_password = self.fake.password(length=40)
+        form_data = {'username': self.fake.user_name(),
+                     'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name()}
 
         form = UserRegisterForm(data=form_data)
 
@@ -205,16 +224,18 @@ class UserRegisterFormTests(TestCase):
         self.assertEqual(form.errors['email'], ['This field is required.'])
 
     def test_register_user_created_successfully(self):
-        form_data = {'username': 'test_user',
-                     'password1': 'test_password',
-                     'password2': 'test_password',
-                     'first_name': 'test_first',
-                     'last_name': 'test_last',
-                     'email': 'testuser@example.com'}
+        new_password = self.fake.password(length=40)
+        new_username = self.fake.user_name()
+        form_data = {'username': new_username,
+                     'password1': new_password,
+                     'password2': new_password,
+                     'first_name': self.fake.first_name(),
+                     'last_name': self.fake.last_name(),
+                     'email': self.fake.email()}
 
         response = self.client.post(self.register_url, form_data)
 
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('login'))
-        self.assertTrue(CustomUser.objects.filter(username='test_user').exists())
+        self.assertTrue(CustomUser.objects.filter(username=new_username).exists())
 
