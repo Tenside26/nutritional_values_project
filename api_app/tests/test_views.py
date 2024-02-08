@@ -73,3 +73,23 @@ class CustomUserViewsTests(TestCase):
         expected_user = CustomUser.objects.get(pk=response.data['pk'])
         serialized_data = CustomUserSerializer(expected_user).data
         self.assertEqual(response.data, serialized_data)
+
+    def test_user_update_api_view_put_patch(self):
+        updated_username = self.fake.user_name()
+        updated_email = self.fake.email()
+
+        detail_url = reverse('api-user-update', args=[self.first_user.pk])
+        updated_data = {
+            'username': updated_username,
+            'email': updated_email,
+        }
+        response = self.client.put(detail_url, data=updated_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_user = CustomUser.objects.get(pk=self.first_user.pk)
+        serialized_data = CustomUserSerializer(updated_user).data
+        self.assertEqual(response.data, serialized_data)
+        self.assertEqual(updated_user.username, updated_username)
+        self.assertEqual(updated_user.email, updated_email)
+
