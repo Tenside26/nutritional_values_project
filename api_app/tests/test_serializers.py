@@ -47,7 +47,7 @@ class CustomUserSerializerTests(TestCase):
 
         instance = serializer.save()
         self.created_instance = instance
-        saved_instance = CustomUser.objects.get(pk=instance.pk)
+        saved_instance = CustomUser.objects.get(pk=self.created_instance.pk)
 
         self.assertEqual(saved_instance.username, self.serializer_input_data['username'])
         self.assertEqual(saved_instance.first_name, self.serializer_input_data['first_name'])

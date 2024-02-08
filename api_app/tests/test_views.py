@@ -93,3 +93,9 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(updated_user.username, updated_username)
         self.assertEqual(updated_user.email, updated_email)
 
+    def test_user_destroy_api_view_delete(self):
+
+        detail_url = reverse('api-user-destroy', args=[self.second_user.pk])
+        response = self.client.delete(detail_url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
