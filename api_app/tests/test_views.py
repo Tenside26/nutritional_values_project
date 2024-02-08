@@ -57,3 +57,19 @@ class CustomUserViewsTests(TestCase):
         expected_users = CustomUser.objects.get(pk=self.first_user.pk)
         serialized_data = CustomUserSerializer(expected_users).data
         self.assertEqual(response.data, serialized_data)
+
+    def test_user_create_api_view_post(self):
+        create_url = reverse('api-user-create')
+        new_user_data = {
+            'username': self.fake.user_name(),
+            'first_name': self.fake.first_name(),
+            'last_name': self.fake.last_name(),
+            'email': self.fake.email(),
+        }
+        response = self.client.post(create_url, new_user_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        expected_user = CustomUser.objects.get(pk=response.data['pk'])
+        serialized_data = CustomUserSerializer(expected_user).data
+        self.assertEqual(response.data, serialized_data)

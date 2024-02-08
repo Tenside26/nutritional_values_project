@@ -6,7 +6,7 @@ from calculator_app.models import Product
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = "username", "first_name", "last_name", "email"
+        fields = "pk", "username", "first_name", "last_name", "email"
 
 
 class ProductSerializer(serializers.ModelSerializer):
