@@ -19,6 +19,10 @@ class CustomUserViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
+    def list(self, request, *args, **kwargs):
+        self.pagination_class = CustomUserPageNumberPagination
+        return super().list(request, *args, **kwargs)
+
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
