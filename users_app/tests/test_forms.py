@@ -4,6 +4,7 @@ from users_app.forms import UserLoginForm, UserRegisterForm
 from users_app.models import CustomUser
 from django.urls import reverse
 from users_app.factories import CustomUserFactory
+from faker import Faker
 
 
 class UserLoginFormTests(TestCase):
@@ -90,19 +91,8 @@ class UserRegisterFormTests(TestCase):
 
     def setUp(self):
         self.fake = Faker()
-        self.test_user = CustomUser.objects.create_user(
-            username='existing_user',
-            password='existing_password',
-            first_name='existing_first',
-            last_name='existing_last',
-            email='existing@example.com'
-        )
+        self.existing_user = CustomUserFactory()
         self.register_url = reverse('register')
-
-    def tearDown(self):
-        if self.test_user:
-            self.test_user.delete()
-        super().tearDown()
 
     def test_register_valid_data(self):
         new_password = self.fake.password(length=40)
@@ -131,7 +121,7 @@ class UserRegisterFormTests(TestCase):
                      'password2': new_password,
                      'first_name': self.fake.first_name(),
                      'last_name': self.fake.last_name(),
-                     'email': 'existing@example.com'}
+                     'email': self.existing_user.email}
 
         form = UserRegisterForm(data=form_data)
 
@@ -140,7 +130,7 @@ class UserRegisterFormTests(TestCase):
 
     def test_register_taken_username(self):
         new_password = self.fake.password(length=40)
-        form_data = {'username': 'existing_user',
+        form_data = {'username': self.existing_user.username,
                      'password1': new_password,
                      'password2': new_password,
                      'first_name': self.fake.first_name(),
