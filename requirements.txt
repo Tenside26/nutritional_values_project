@@ -4,6 +4,7 @@ charset-normalizer==3.3.2
 Django==5.0.1
 django-extensions==3.2.3
 djangorestframework==3.14.0
+factory-boy==3.3.0
 Faker==22.6.0
 idna==3.6
 psycopg2==2.9.9

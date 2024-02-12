@@ -3,23 +3,14 @@ from django.test import TestCase, Client
 from users_app.forms import UserLoginForm, UserRegisterForm
 from users_app.models import CustomUser
 from django.urls import reverse
-from faker import Faker
+from users_app.factories import CustomUserFactory
 
 
 class UserLoginFormTests(TestCase):
 
     def setUp(self):
-        self.fake = Faker()
-        self.test_user = CustomUser.objects.create_user(
-            username=self.fake.user_name(),
-            password=self.fake.password(length=40),
-        )
+        self.test_user = CustomUserFactory()
         self.client = Client()
-
-    def tearDown(self):
-        if self.test_user:
-            self.test_user.delete()
-        super().tearDown()
 
     def test_login_valid_data(self):
         form_data = {'username': self.test_user.username,
