@@ -1,5 +1,4 @@
 from calculator_app.models import Product
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, DestroyAPIView, CreateAPIView, ListAPIView
 from users_app.models import CustomUser
 from .serializers import CustomUserSerializer, ProductSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -21,27 +20,10 @@ class CustomUserViewSet(ModelViewSet):
     serializer_class = CustomUserSerializer
 
 
-class ProductListView(ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    pagination_class = ProductPageNumberPagination
-
-
-class ProductDetailView(RetrieveAPIView):
+class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-
-class ProductCreateView(CreateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductUpdateView(UpdateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductDestroyView(DestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    def list(self, request, *args, **kwargs):
+        self.pagination_class = ProductPageNumberPagination
+        return super().list(request, *args, **kwargs)
