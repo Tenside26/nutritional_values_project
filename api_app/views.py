@@ -3,6 +3,7 @@ from rest_framework.generics import RetrieveAPIView, UpdateAPIView, DestroyAPIVi
 from users_app.models import CustomUser
 from .serializers import CustomUserSerializer, ProductSerializer
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
 
 
 class ProductPageNumberPagination(PageNumberPagination):
@@ -15,27 +16,7 @@ class CustomUserPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 
-class CustomUserListView(ListAPIView):  # Add Pagination
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-
-class CustomUserDetailView(RetrieveAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-
-class CustomUserCreateView(CreateAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-
-class CustomUserUpdateView(UpdateAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-
-class CustomUserDestroyView(DestroyAPIView):
+class CustomUserViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
