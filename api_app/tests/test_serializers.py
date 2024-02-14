@@ -1,8 +1,9 @@
 from django.test import TestCase
-from api_app.serializers import CustomUserSerializer
+from api_app.serializers import CustomUserSerializer, ProductSerializer
 from users_app.models import CustomUser
 from faker import Faker
 from users_app.factories import CustomUserFactory
+from calculator_app.factories import ProductFactory
 
 
 class CustomUserSerializerTests(TestCase):
@@ -16,6 +17,7 @@ class CustomUserSerializerTests(TestCase):
             'last_name': self.fake.last_name(),
             'email': self.fake.email(),
         }
+
         self.serializer = CustomUserSerializer(instance=self.user_data)
 
     def tearDown(self):
@@ -89,5 +91,18 @@ class CustomUserSerializerTests(TestCase):
         self.assertIsNone(serialized_data.validated_data.get('email'))
 
 
+class ProductSerializerTests(TestCase):
 
+    def setUp(self):
+        self.fake = Faker()
+        self.product_data = ProductFactory()
+        self.serializer_input_data = {
+            'name': self.fake.word(max_nb_chars=255),
+            'serving_size': self.fake.random_int(min=1, max=5000),
+            'calories': self.fake.random_int(min=1, max=10000),
+            'protein': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'carbohydrate': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'fat': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+        }
 
+        self.serializer = ProductSerializer(instance=self.product_data)
