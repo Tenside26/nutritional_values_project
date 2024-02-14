@@ -1,6 +1,7 @@
 from django.test import TestCase
 from api_app.serializers import CustomUserSerializer, ProductSerializer
 from users_app.models import CustomUser
+from calculator_app.models import Product
 from faker import Faker
 from users_app.factories import CustomUserFactory
 from calculator_app.factories import ProductFactory
@@ -107,6 +108,13 @@ class ProductSerializerTests(TestCase):
 
         self.serializer = ProductSerializer(instance=self.product_data)
 
+    def tearDown(self):
+
+        if hasattr(self, 'created_instance'):
+            self.created_instance.delete()
+
+        super().tearDown()
+
     def test_product_serialization(self):
         serialized_data = self.serializer.data
 
@@ -116,3 +124,19 @@ class ProductSerializerTests(TestCase):
         self.assertEqual(serialized_data['protein'], self.product_data.protein)
         self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
         self.assertEqual(serialized_data['fat'], self.product_data.fat)
+
+    def test_product_deserialization(self):
+        serializer = ProductSerializer(data=self.serializer_input_data)
+        self.assertTrue(serializer.is_valid())
+
+        instance = serializer.save()
+        self.created_instance = instance
+        saved_instance = Product.objects.get(pk=self.created_instance.pk)
+
+        self.assertEqual(saved_instance.name, self.serializer_input_data['name'])
+        self.assertEqual(saved_instance.serving_size, self.serializer_input_data['serving_size'])
+        self.assertEqual(saved_instance.calories, self.serializer_input_data['calories'])
+        self.assertEqual(saved_instance.protein, self.serializer_input_data['protein'])
+        self.assertEqual(saved_instance.carbohydrate, self.serializer_input_data['carbohydrate'])
+        self.assertEqual(saved_instance.fat, self.serializer_input_data['fat'])
+
