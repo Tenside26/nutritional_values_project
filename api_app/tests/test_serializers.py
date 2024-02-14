@@ -87,3 +87,7 @@ class CustomUserSerializerTests(TestCase):
         self.assertIsNone(serialized_data.validated_data.get('first_name'))
         self.assertIsNone(serialized_data.validated_data.get('last_name'))
         self.assertIsNone(serialized_data.validated_data.get('email'))
+
+
+
+
