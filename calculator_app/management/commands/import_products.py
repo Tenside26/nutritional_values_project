@@ -21,11 +21,11 @@ class Command(BaseCommand):
             for row in reader:
                 _, created = Product.objects.get_or_create(
                     name=row[1],
-                    serving_size=row[2],
+                    serving_size=row[2][:-1],
                     calories=row[3],
-                    protein=row[38],
-                    carbohydrate=row[58],
-                    fat=row[67],
+                    protein=row[38][:-1],
+                    carbohydrate=row[58][:-1],
+                    fat=row[67][:-1],
                 )
 
         self.stdout.write(self.style.SUCCESS('Products imported successfully'))
