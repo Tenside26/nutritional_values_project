@@ -160,3 +160,13 @@ class ProductSerializerTests(TestCase):
         self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
         self.assertEqual(serialized_data['fat'], self.product_data.fat)
 
+    def test_product_serialization_wrong_calories(self):
+        serialized_data = self.serializer.data
+
+        self.assertEqual(serialized_data['name'],  self.product_data.name)
+        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
+        self.assertNotEqual(serialized_data['calories'], self.fake.random_int(min=1, max=10000))
+        self.assertEqual(serialized_data['protein'], self.product_data.protein)
+        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
+        self.assertEqual(serialized_data['fat'], self.product_data.fat)
+
