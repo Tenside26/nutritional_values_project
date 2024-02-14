@@ -202,3 +202,14 @@ class ProductSerializerTests(TestCase):
         self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
         self.assertNotEqual(serialized_data['fat'], self.fake.pyfloat(left_digits=2, right_digits=2, positive=True))
 
+    def test_product_serialization_missing_data(self):
+        serialized_data = ProductSerializer(data={})
+
+        self.assertFalse(serialized_data.is_valid())
+        self.assertIsNone(serialized_data.validated_data.get('name'))
+        self.assertIsNone(serialized_data.validated_data.get('serving_size'))
+        self.assertIsNone(serialized_data.validated_data.get('calories'))
+        self.assertIsNone(serialized_data.validated_data.get('protein'))
+        self.assertIsNone(serialized_data.validated_data.get('carbohydrate'))
+        self.assertIsNone(serialized_data.validated_data.get('fat'))
+
