@@ -6,9 +6,9 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True, blank=False, null=False)
     serving_size = models.IntegerField(default=100, blank=False, null=False)
     calories = models.IntegerField()
-    protein = models.DecimalField(max_digits=15, decimal_places=2)
-    carbohydrate = models.DecimalField(max_digits=15, decimal_places=2)
-    fat = models.DecimalField(max_digits=15, decimal_places=2)
+    protein = models.FloatField()
+    carbohydrate = models.FloatField()
+    fat = models.FloatField()
 
 
 class Meal(models.Model):

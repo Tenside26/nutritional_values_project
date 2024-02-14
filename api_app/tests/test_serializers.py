@@ -97,7 +97,7 @@ class ProductSerializerTests(TestCase):
         self.fake = Faker()
         self.product_data = ProductFactory()
         self.serializer_input_data = {
-            'name': self.fake.word(max_nb_chars=255),
+            'name': self.fake.text(max_nb_chars=255),
             'serving_size': self.fake.random_int(min=1, max=5000),
             'calories': self.fake.random_int(min=1, max=10000),
             'protein': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
@@ -106,3 +106,13 @@ class ProductSerializerTests(TestCase):
         }
 
         self.serializer = ProductSerializer(instance=self.product_data)
+
+    def test_product_serialization(self):
+        serialized_data = self.serializer.data
+
+        self.assertEqual(serialized_data['name'], self.product_data.name)
+        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
+        self.assertEqual(serialized_data['calories'], self.product_data.calories)
+        self.assertEqual(serialized_data['protein'], self.product_data.protein)
+        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
+        self.assertEqual(serialized_data['fat'], self.product_data.fat)

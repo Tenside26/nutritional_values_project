@@ -6,7 +6,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Product
 
-    name = factory.Faker('word', max_nb_chars=255)
+    name = factory.Faker('text', max_nb_chars=255)
     serving_size = factory.Faker('random_int', min=1, max=5000)
     calories = factory.Faker('random_int', min=1, max=10000)
     protein = factory.Faker('pyfloat', left_digits=2, right_digits=2, positive=True)
