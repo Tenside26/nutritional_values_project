@@ -140,3 +140,13 @@ class ProductSerializerTests(TestCase):
         self.assertEqual(saved_instance.carbohydrate, self.serializer_input_data['carbohydrate'])
         self.assertEqual(saved_instance.fat, self.serializer_input_data['fat'])
 
+    def test_product_serialization_wrong_username(self):
+        serialized_data = self.serializer.data
+
+        self.assertNotEqual(serialized_data['name'],  self.fake.text(max_nb_chars=255))
+        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
+        self.assertEqual(serialized_data['calories'], self.product_data.calories)
+        self.assertEqual(serialized_data['protein'], self.product_data.protein)
+        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
+        self.assertEqual(serialized_data['fat'], self.product_data.fat)
+
