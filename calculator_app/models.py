@@ -13,4 +13,4 @@ class Product(models.Model):
 
 class Meal(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="meal_user")
-    product = models.ManyToManyField(Product, on_delete=models.CASCADE, related_name="meal_product")
+    product = models.ManyToManyField(Product)
