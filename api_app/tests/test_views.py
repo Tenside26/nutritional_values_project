@@ -7,6 +7,7 @@ from users_app.models import CustomUser
 from faker import Faker
 from api_app.serializers import CustomUserSerializer
 from users_app.factories import CustomUserFactory
+from calculator_app.factories import ProductFactory
 
 
 class CustomUserViewsTests(TestCase):
@@ -15,8 +16,13 @@ class CustomUserViewsTests(TestCase):
         self.client = APIClient()
         self.fake = Faker()
 
-        self.first_user = CustomUserFactory()
-        self.second_user = CustomUserFactory()
+        self.user = CustomUserFactory()
+        self.test_user_data = {
+            'username': self.fake.user_name(),
+            'first_name': self.fake.first_name(),
+            'last_name': self.fake.last_name(),
+            'email': self.fake.email(),
+        }
 
     def test_user_list_api_view_get(self):
         list_url = reverse('user-list')
@@ -31,23 +37,17 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data['results'], serialized_data)
 
     def test_user_detail_api_view_get(self):
-        detail_url = reverse('user-detail', args=[self.first_user.pk])
+        detail_url = reverse('user-detail', args=[self.user.pk])
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected_users = CustomUser.objects.get(pk=self.first_user.pk)
+        expected_users = CustomUser.objects.get(pk=self.user.pk)
         serialized_data = CustomUserSerializer(expected_users).data
         self.assertEqual(response.data, serialized_data)
 
     def test_user_create_api_view_post(self):
         create_url = reverse('user-list')
-        new_user_data = {
-            'username': self.fake.user_name(),
-            'first_name': self.fake.first_name(),
-            'last_name': self.fake.last_name(),
-            'email': self.fake.email(),
-        }
-        response = self.client.post(create_url, new_user_data, format='json')
+        response = self.client.post(create_url, self.test_user_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -56,27 +56,34 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data, serialized_data)
 
     def test_user_update_api_view_put_patch(self):
-        updated_username = self.fake.user_name()
-        updated_email = self.fake.email()
-
-        detail_url = reverse('user-detail', args=[self.first_user.pk])
+        detail_url = reverse('user-detail', args=[self.user.pk])
         updated_data = {
-            'username': updated_username,
-            'email': updated_email,
+            'username': self.test_user_data["username"],
+            'email': self.test_user_data["email"],
         }
-        response = self.client.put(detail_url, data=updated_data, format='json')
 
+        response = self.client.put(detail_url, data=updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        updated_user = CustomUser.objects.get(pk=self.first_user.pk)
+        updated_user = CustomUser.objects.get(pk=self.user.pk)
         serialized_data = CustomUserSerializer(updated_user).data
         self.assertEqual(response.data, serialized_data)
-        self.assertEqual(updated_user.username, updated_username)
-        self.assertEqual(updated_user.email, updated_email)
+        self.assertEqual(updated_user.username, self.test_user_data["username"])
+        self.assertEqual(updated_user.email, self.test_user_data["email"])
 
     def test_user_destroy_api_view_delete(self):
 
-        detail_url = reverse('user-detail', args=[self.second_user.pk])
+        detail_url = reverse('user-detail', args=[self.user.pk])
         response = self.client.delete(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class ProductViewsTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.fake = Faker()
+
+        self.product = ProductFactory()
+
