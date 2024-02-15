@@ -4,8 +4,9 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from users_app.models import CustomUser
+from calculator_app.models import Product
 from faker import Faker
-from api_app.serializers import CustomUserSerializer
+from api_app.serializers import CustomUserSerializer, ProductSerializer
 from users_app.factories import CustomUserFactory
 from calculator_app.factories import ProductFactory
 
@@ -87,3 +88,15 @@ class ProductViewsTests(TestCase):
 
         self.product = ProductFactory()
 
+    def test_api_view_product_list_get(self):
+        list_url = reverse('product-list')
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_users = Product.objects.all()
+        serialized_data = ProductSerializer(expected_users, many=True).data
+        self.assertEqual(response.data['count'], len(expected_users))
+        self.assertEqual(response.data['next'], None)
+        self.assertEqual(response.data['previous'], None)
+        self.assertEqual(response.data['results'], serialized_data)
+        
