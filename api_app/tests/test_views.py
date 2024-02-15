@@ -87,6 +87,14 @@ class ProductViewsTests(TestCase):
         self.fake = Faker()
 
         self.product = ProductFactory()
+        self.test_product_data = {
+            'name': self.fake.text(max_nb_chars=255),
+            'serving_size': self.fake.random_int(min=1, max=2000),
+            'calories': self.fake.random_int(min=1, max=2000),
+            'protein': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'carbohydrate': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'fat': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+        }
 
     def test_api_view_product_list_get(self):
         list_url = reverse('product-list')
@@ -107,4 +115,14 @@ class ProductViewsTests(TestCase):
 
         expected_users = Product.objects.get(pk=self.product.pk)
         serialized_data = ProductSerializer(expected_users).data
+        self.assertEqual(response.data, serialized_data)
+
+    def test_api_view_product_create_post(self):
+        create_url = reverse('product-list')
+        response = self.client.post(create_url, self.test_product_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        expected_user = Product.objects.get(pk=response.data['pk'])
+        serialized_data = ProductSerializer(expected_user).data
         self.assertEqual(response.data, serialized_data)
