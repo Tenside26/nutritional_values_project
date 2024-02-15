@@ -94,44 +94,41 @@ class CustomUserSerializerTests(TestCase):
 
 class ProductSerializerTests(TestCase):
 
-    def setUp(self):
-        self.fake = Faker()
-        self.product_data = ProductFactory()
-        self.serializer_input_data = {
-            'name': self.fake.text(max_nb_chars=255),
-            'serving_size': self.fake.random_int(min=1, max=5000),
-            'calories': self.fake.random_int(min=1, max=10000),
-            'protein': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
-            'carbohydrate': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
-            'fat': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+    @classmethod
+    def setUpTestData(cls):
+        cls.fake = Faker()
+        cls.product_data = ProductFactory()
+        cls.serializer = ProductSerializer(instance=cls.product_data)
+        cls.serializer_input_data = {
+            'name': cls.fake.text(max_nb_chars=255),
+            'serving_size': cls.fake.random_int(min=1, max=5000),
+            'calories': cls.fake.random_int(min=1, max=10000),
+            'protein': cls.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'carbohydrate': cls.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            'fat': cls.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
         }
-
-        self.serializer = ProductSerializer(instance=self.product_data)
 
     def tearDown(self):
 
-        if hasattr(self, 'created_instance'):
-            self.created_instance.delete()
+        if hasattr(self, 'instance'):
+            self.instance.delete()
 
         super().tearDown()
 
     def test_product_serialization(self):
-        serialized_data = self.serializer.data
-
-        self.assertEqual(serialized_data['name'], self.product_data.name)
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
+        self.assertEqual(self.serializer.data['name'], self.product_data.name)
+        self.assertEqual(self.serializer.data['serving_size'], self.product_data.serving_size)
+        self.assertEqual(self.serializer.data['calories'], self.product_data.calories)
+        self.assertEqual(self.serializer.data['protein'], self.product_data.protein)
+        self.assertEqual(self.serializer.data['carbohydrate'], self.product_data.carbohydrate)
+        self.assertEqual(self.serializer.data['fat'], self.product_data.fat)
 
     def test_product_deserialization(self):
         serializer = ProductSerializer(data=self.serializer_input_data)
         self.assertTrue(serializer.is_valid())
 
-        instance = serializer.save()
-        self.created_instance = instance
-        saved_instance = Product.objects.get(pk=self.created_instance.pk)
+        self.instance = serializer.save()
+        saved_instance = Product.objects.get(pk=self.instance.pk)
 
         self.assertEqual(saved_instance.name, self.serializer_input_data['name'])
         self.assertEqual(saved_instance.serving_size, self.serializer_input_data['serving_size'])
@@ -140,67 +137,29 @@ class ProductSerializerTests(TestCase):
         self.assertEqual(saved_instance.carbohydrate, self.serializer_input_data['carbohydrate'])
         self.assertEqual(saved_instance.fat, self.serializer_input_data['fat'])
 
-    def test_product_serialization_wrong_name(self):
-        serialized_data = self.serializer.data
+    def test_product_serialization_incorrect_name_data(self):
+        self.assertNotEqual(self.serializer.data['name'], self.fake.text(max_nb_chars=255))
 
-        self.assertNotEqual(serialized_data['name'],  self.fake.text(max_nb_chars=255))
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
+    def test_product_serialization_incorrect_serving_size_data(self):
+        self.assertNotEqual(self.serializer.data['serving_size'], self.fake.random_int(min=1, max=5000))
 
-    def test_product_serialization_wrong_serving_size(self):
-        serialized_data = self.serializer.data
+    def test_product_serialization_incorrect_calories_data(self):
+        self.assertNotEqual(self.serializer.data['calories'], self.fake.random_int(min=1, max=10000))
 
-        self.assertEqual(serialized_data['name'],  self.product_data.name)
-        self.assertNotEqual(serialized_data['serving_size'], self.fake.random_int(min=1, max=5000))
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
-
-    def test_product_serialization_wrong_calories(self):
-        serialized_data = self.serializer.data
-
-        self.assertEqual(serialized_data['name'],  self.product_data.name)
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertNotEqual(serialized_data['calories'], self.fake.random_int(min=1, max=10000))
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
-
-    def test_product_serialization_wrong_protein(self):
-        serialized_data = self.serializer.data
-
-        self.assertEqual(serialized_data['name'],  self.product_data.name)
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertNotEqual(serialized_data['protein'], self.fake.pyfloat(left_digits=2, right_digits=2, positive=True))
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
-
-    def test_product_serialization_wrong_carbohydrate(self):
-        serialized_data = self.serializer.data
-
-        self.assertEqual(serialized_data['name'],  self.product_data.name)
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertNotEqual(serialized_data['carbohydrate'], self.fake.pyfloat(left_digits=2,
+    def test_product_serialization_incorrect_protein_data(self):
+        self.assertNotEqual(self.serializer.data['protein'], self.fake.pyfloat(left_digits=2,
                                                                                right_digits=2,
                                                                                positive=True))
-        self.assertEqual(serialized_data['fat'], self.product_data.fat)
 
-    def test_product_serialization_wrong_fat(self):
-        serialized_data = self.serializer.data
+    def test_product_serialization_incorrect_carbohydrate_data(self):
+        self.assertNotEqual(self.serializer.data['carbohydrate'], self.fake.pyfloat(left_digits=2,
+                                                                                    right_digits=2,
+                                                                                    positive=True))
 
-        self.assertEqual(serialized_data['name'],  self.product_data.name)
-        self.assertEqual(serialized_data['serving_size'], self.product_data.serving_size)
-        self.assertEqual(serialized_data['calories'], self.product_data.calories)
-        self.assertEqual(serialized_data['protein'], self.product_data.protein)
-        self.assertEqual(serialized_data['carbohydrate'], self.product_data.carbohydrate)
-        self.assertNotEqual(serialized_data['fat'], self.fake.pyfloat(left_digits=2, right_digits=2, positive=True))
+    def test_product_serialization_incorrect_fat_data(self):
+        self.assertNotEqual(self.serializer.data['fat'], self.fake.pyfloat(left_digits=2,
+                                                                           right_digits=2,
+                                                                           positive=True))
 
     def test_product_serialization_missing_data(self):
         serialized_data = ProductSerializer(data={})
