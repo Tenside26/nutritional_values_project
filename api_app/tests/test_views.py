@@ -99,4 +99,12 @@ class ProductViewsTests(TestCase):
         self.assertEqual(response.data['next'], None)
         self.assertEqual(response.data['previous'], None)
         self.assertEqual(response.data['results'], serialized_data)
-        
+
+    def test_api_view_product_detail_get(self):
+        detail_url = reverse('product-detail', args=[self.product.pk])
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_users = Product.objects.get(pk=self.product.pk)
+        serialized_data = ProductSerializer(expected_users).data
+        self.assertEqual(response.data, serialized_data)
