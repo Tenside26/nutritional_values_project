@@ -28,7 +28,6 @@ class CustomUserSerializerTests(TestCase):
         self.assertEqual(self.serializer.data['email'], self.user_data.email)
 
     def test_user_deserialization(self):
-
         serializer = CustomUserSerializer(data=self.serializer_input_data)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()

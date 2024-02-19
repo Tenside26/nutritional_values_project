@@ -1,7 +1,5 @@
 import factory
 from calculator_app.models import Product
-from users_app.factories import CustomUserFactory
-
 
 
 class ProductFactory(factory.django.DjangoModelFactory):
