@@ -1,9 +1,16 @@
 from django.db import models
 from users_app.models import CustomUser
+from django.core.validators import RegexValidator
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    name_validator = RegexValidator(
+        regex='^[a-zA-Z,]+$',
+        message='Enter only alphabetical characters with or without commas.',
+        code='invalid_name'
+    )
+
+    name = models.CharField(max_length=255, unique=True, blank=False, null=False, validators=[name_validator])
     serving_size = models.IntegerField(default=100, blank=False, null=False)
     calories = models.IntegerField()
     protein = models.FloatField()
