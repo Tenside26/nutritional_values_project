@@ -96,33 +96,52 @@ class ProductViewsTests(TestCase):
             'fat': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
         }
 
+        self.detail_url = reverse('product-detail', args=[self.product.pk])
+        self.list_url = reverse('product-list')
+
     def test_api_view_product_list_get(self):
-        list_url = reverse('product-list')
-        response = self.client.get(list_url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected_users = Product.objects.all()
-        serialized_data = ProductSerializer(expected_users, many=True).data
-        self.assertEqual(response.data['count'], len(expected_users))
+        expected_product = Product.objects.all()
+        serialized_data = ProductSerializer(expected_product, many=True).data
+        self.assertEqual(response.data['count'], len(expected_product))
         self.assertEqual(response.data['next'], None)
         self.assertEqual(response.data['previous'], None)
         self.assertEqual(response.data['results'], serialized_data)
 
     def test_api_view_product_detail_get(self):
-        detail_url = reverse('product-detail', args=[self.product.pk])
-        response = self.client.get(detail_url)
+        response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected_users = Product.objects.get(pk=self.product.pk)
-        serialized_data = ProductSerializer(expected_users).data
+        expected_product = Product.objects.get(pk=self.product.pk)
+        serialized_data = ProductSerializer(expected_product).data
         self.assertEqual(response.data, serialized_data)
 
     def test_api_view_product_create_post(self):
-        create_url = reverse('product-list')
-        response = self.client.post(create_url, self.test_product_data, format='json')
-
+        response = self.client.post(self.list_url, self.test_product_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        expected_user = Product.objects.get(pk=response.data['pk'])
-        serialized_data = ProductSerializer(expected_user).data
+        expected_product = Product.objects.get(pk=response.data['pk'])
+        serialized_data = ProductSerializer(expected_product).data
         self.assertEqual(response.data, serialized_data)
+
+    def test_api_view_product_update_put_patch(self):
+        updated_data = {
+            'name': self.test_product_data["name"],
+            'calories': self.test_product_data["calories"],
+        }
+
+        response = self.client.put(self.detail_url, data=updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_product = Product.objects.get(pk=self.product.pk)
+        serialized_data = ProductSerializer(updated_product).data
+        self.assertEqual(response.data, serialized_data)
+        self.assertEqual(updated_product.name, self.test_product_data["name"])
+        self.assertEqual(updated_product.calories, self.test_product_data["calories"])
+
+    def test_api_view_product_delete(self):
+        response = self.client.delete(self.detail_url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
