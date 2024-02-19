@@ -25,9 +25,11 @@ class CustomUserViewsTests(TestCase):
             'email': self.fake.email(),
         }
 
+        self.list_url = reverse('user-list')
+        self.detail_url = reverse('user-detail', args=[self.user.pk])
+
     def test_user_list_api_view_get(self):
-        list_url = reverse('user-list')
-        response = self.client.get(list_url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected_users = CustomUser.objects.all()
@@ -38,8 +40,7 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data['results'], serialized_data)
 
     def test_user_detail_api_view_get(self):
-        detail_url = reverse('user-detail', args=[self.user.pk])
-        response = self.client.get(detail_url)
+        response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected_users = CustomUser.objects.get(pk=self.user.pk)
@@ -47,8 +48,7 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data, serialized_data)
 
     def test_user_create_api_view_post(self):
-        create_url = reverse('user-list')
-        response = self.client.post(create_url, self.test_user_data, format='json')
+        response = self.client.post(self.list_url, self.test_user_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -57,13 +57,12 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data, serialized_data)
 
     def test_user_update_api_view_put_patch(self):
-        detail_url = reverse('user-detail', args=[self.user.pk])
         updated_data = {
             'username': self.test_user_data["username"],
             'email': self.test_user_data["email"],
         }
 
-        response = self.client.put(detail_url, data=updated_data, format='json')
+        response = self.client.put(self.detail_url, data=updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         updated_user = CustomUser.objects.get(pk=self.user.pk)
@@ -73,9 +72,7 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(updated_user.email, self.test_user_data["email"])
 
     def test_user_destroy_api_view_delete(self):
-
-        detail_url = reverse('user-detail', args=[self.user.pk])
-        response = self.client.delete(detail_url)
+        response = self.client.delete(self.detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -134,7 +131,6 @@ class ProductViewsTests(TestCase):
 
         response = self.client.put(self.detail_url, data=updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         updated_product = Product.objects.get(pk=self.product.pk)
         serialized_data = ProductSerializer(updated_product).data
         self.assertEqual(response.data, serialized_data)
