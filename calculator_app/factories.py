@@ -1,6 +1,7 @@
 import factory
-from calculator_app.models import Product, Meal
+from calculator_app.models import Product
 from users_app.factories import CustomUserFactory
+
 
 
 class ProductFactory(factory.django.DjangoModelFactory):
@@ -13,4 +14,5 @@ class ProductFactory(factory.django.DjangoModelFactory):
     protein = factory.Faker('pyfloat', left_digits=2, right_digits=2, positive=True)
     carbohydrate = factory.Faker('pyfloat', left_digits=2, right_digits=2, positive=True)
     fat = factory.Faker('pyfloat', left_digits=2, right_digits=2, positive=True)
+
 
