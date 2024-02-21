@@ -11,7 +11,7 @@ class Product(models.Model):
     )
 
     name = models.CharField(max_length=255, unique=True, blank=False, null=False, validators=[name_validator])
-    serving_size = models.IntegerField(default=100, blank=False, null=False)
+    serving_size = models.IntegerField(default=100)
     calories = models.IntegerField()
     protein = models.FloatField()
     carbohydrate = models.FloatField()

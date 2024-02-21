@@ -36,3 +36,8 @@ class ProductModelTests(TestCase):
         with self.assertRaises(IntegrityError):
             product_with_same_name = ProductFactory(name=self.product.name)
             product_with_same_name.save()
+
+    def test_product_model_name_null_constraint(self):
+        with self.assertRaises(IntegrityError):
+            null_field = ProductFactory(name=None)
+            null_field.save()
