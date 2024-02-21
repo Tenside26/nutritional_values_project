@@ -41,3 +41,11 @@ class ProductModelTests(TestCase):
         with self.assertRaises(IntegrityError):
             null_field = ProductFactory(name=None)
             null_field.save()
+
+    def test_product_model_serving_size_field(self):
+        with self.assertRaises(ValidationError):
+            self.product.serving_size = self.fake.word()
+            self.product.full_clean()
+
+
+
