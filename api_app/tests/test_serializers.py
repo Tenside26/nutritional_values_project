@@ -1,7 +1,7 @@
 from django.test import TestCase
 from api_app.serializers import CustomUserSerializer, ProductSerializer, MealSerializer
 from users_app.models import CustomUser
-from calculator_app.models import Product, Meal
+from calculator_app.models import Product
 from faker import Faker
 from users_app.factories import CustomUserFactory
 from calculator_app.factories import ProductFactory, MealFactory
@@ -39,16 +39,16 @@ class CustomUserSerializerTests(TestCase):
         self.assertEqual(saved_instance.last_name, self.serializer_input_data['last_name'])
         self.assertEqual(saved_instance.email, self.serializer_input_data['email'])
 
-    def test_user_serialization_wrong_username(self):
-        self.assertNotEqual(self.serializer.data['username'],  self.fake.user_name())
+    def test_user_serialization_incorrect_username(self):
+        self.assertNotEqual(self.serializer.data['username'], self.fake.user_name())
 
-    def test_user_serialization_wrong_first_name(self):
-        self.assertNotEqual(self.serializer.data['first_name'],  self.fake.first_name())
+    def test_user_serialization_incorrect_first_name(self):
+        self.assertNotEqual(self.serializer.data['first_name'], self.fake.first_name())
 
-    def test_user_serialization_wrong_last_name(self):
-        self.assertNotEqual(self.serializer.data['last_name'],  self.fake.last_name())
+    def test_user_serialization_incorrect_last_name(self):
+        self.assertNotEqual(self.serializer.data['last_name'], self.fake.last_name())
 
-    def test_user_serialization_wrong_email(self):
+    def test_user_serialization_incorrect_email(self):
         self.assertNotEqual(self.serializer.data['email'], self.fake.email())
 
     def test_user_serialization_missing_data(self):
@@ -69,7 +69,7 @@ class ProductSerializerTests(TestCase):
         cls.product_data = ProductFactory()
         cls.serializer = ProductSerializer(instance=cls.product_data)
         cls.serializer_input_data = {
-            'name': cls.fake.text(max_nb_chars=255),
+            'name': cls.fake.word(),
             'serving_size': cls.fake.random_int(min=1, max=5000),
             'calories': cls.fake.random_int(min=1, max=10000),
             'protein': cls.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
@@ -153,3 +153,18 @@ class MealSerializerTests(TestCase):
         self.assertEqual(self.meal_serializer.data['user'], self.user_serializer.data)
         self.assertEqual(self.meal_serializer.data['product'], [self.product_serializer.data])
 
+    def test_meal_deserialization(self):
+        pass
+
+    def test_meal_serialization_incorrect_user_data(self):
+        self.assertNotEqual(self.meal_serializer.data['user']["username"], self.fake.user_name())
+
+    def test_meal_serialization_incorrect_product_data(self):
+        self.assertNotEqual(self.meal_serializer.data['product'][0]["name"], self.fake.word())
+
+    def test_meal_serialization_missing_data(self):
+        serialized_data = MealSerializer(data={})
+
+        self.assertFalse(serialized_data.is_valid())
+        self.assertIsNone(serialized_data.validated_data.get("user"))
+        self.assertIsNone(serialized_data.validated_data.get("product"))
