@@ -47,5 +47,25 @@ class ProductModelTests(TestCase):
             self.product.serving_size = self.fake.word()
             self.product.full_clean()
 
+    def test_product_model_calories_field(self):
+        with self.assertRaises(ValidationError):
+            self.product.calories = self.fake.word()
+            self.product.full_clean()
+
+    def test_product_model_protein_field(self):
+        with self.assertRaises(ValidationError):
+            self.product.protein = self.fake.word()
+            self.product.full_clean()
+
+    def test_product_model_carbohydrate_field(self):
+        with self.assertRaises(ValidationError):
+            self.product.carbohydrate = self.fake.word()
+            self.product.full_clean()
+
+    def test_product_model_fat_field(self):
+        with self.assertRaises(ValidationError):
+            self.product.fat = self.fake.word()
+            self.product.full_clean()
+
 
 
