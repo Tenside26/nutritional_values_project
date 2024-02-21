@@ -1,7 +1,7 @@
 from django.test import TestCase
-from api_app.serializers import CustomUserSerializer, ProductSerializer
+from api_app.serializers import CustomUserSerializer, ProductSerializer, MealSerializer
 from users_app.models import CustomUser
-from calculator_app.models import Product
+from calculator_app.models import Product, Meal
 from faker import Faker
 from users_app.factories import CustomUserFactory
 from calculator_app.factories import ProductFactory
@@ -133,4 +133,12 @@ class ProductSerializerTests(TestCase):
         self.assertIsNone(serialized_data.validated_data.get('protein'))
         self.assertIsNone(serialized_data.validated_data.get('carbohydrate'))
         self.assertIsNone(serialized_data.validated_data.get('fat'))
+
+
+class MealSerializerTests(TestCase):
+
+    def setUpTestData(cls):
+        cls.fake = Faker()
+        cls.meal_data = Meal()
+        cls.serializer = MealSerializer(instance=cls.meal_data)
 
