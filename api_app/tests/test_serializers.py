@@ -4,7 +4,7 @@ from users_app.models import CustomUser
 from calculator_app.models import Product, Meal
 from faker import Faker
 from users_app.factories import CustomUserFactory
-from calculator_app.factories import ProductFactory
+from calculator_app.factories import ProductFactory, MealFactory
 
 
 class CustomUserSerializerTests(TestCase):
@@ -136,9 +136,20 @@ class ProductSerializerTests(TestCase):
 
 
 class MealSerializerTests(TestCase):
-
+    @classmethod
     def setUpTestData(cls):
         cls.fake = Faker()
-        cls.meal_data = Meal()
-        cls.serializer = MealSerializer(instance=cls.meal_data)
+
+        cls.product_data = ProductFactory()
+        cls.user_data = CustomUserFactory()
+        cls.meal_data = MealFactory(user=cls.user_data, product=cls.product_data)
+        cls.meal_data.product.set([cls.product_data])
+
+        cls.product_serializer = ProductSerializer(instance=cls.product_data)
+        cls.user_serializer = CustomUserSerializer(instance=cls.user_data)
+        cls.meal_serializer = MealSerializer(instance=cls.meal_data)
+
+    def test_meal_serialization(self):
+        self.assertEqual(self.meal_serializer.data['user'], self.user_serializer.data)
+        self.assertEqual(self.meal_serializer.data['product'], [self.product_serializer.data])
 

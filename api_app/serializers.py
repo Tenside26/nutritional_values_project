@@ -19,7 +19,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class MealSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
-    products = ProductSerializer(many=True)
+    product = ProductSerializer(many=True)
 
     class Meta:
         model = Meal
