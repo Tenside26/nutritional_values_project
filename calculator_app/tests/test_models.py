@@ -2,6 +2,7 @@ from django.test import TestCase
 from calculator_app.factories import ProductFactory
 from calculator_app.models import Product
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from faker import Faker
 
 
@@ -22,9 +23,16 @@ class ProductModelTests(TestCase):
         self.assertIsNotNone(self.product.fat)
 
     def test_product_model_name_char_field(self):
-        self.product.name = self.fake.random_int()
-        self.assertRaises(ValidationError, self.product.full_clean)
+        with self.assertRaises(ValidationError):
+            self.product.name = self.fake.random_int()
+            self.product.full_clean()
 
     def test_product_model_name_max_length(self):
-        self.product.name = 'a' * 256
-        self.assertRaises(ValidationError, self.product.full_clean)
+        with self.assertRaises(ValidationError):
+            self.product.name = 'a' * 256
+            self.product.full_clean()
+
+    def test_product_model_name_unique_constraint(self):
+        with self.assertRaises(IntegrityError):
+            product_with_same_name = ProductFactory(name=self.product.name)
+            product_with_same_name.save()
