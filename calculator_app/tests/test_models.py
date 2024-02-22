@@ -1,6 +1,6 @@
 from django.test import TestCase
-from calculator_app.factories import ProductFactory
-from calculator_app.models import Product
+from calculator_app.factories import ProductFactory, MealFactory, CustomUserFactory
+from calculator_app.models import Product, Meal, CustomUser
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from faker import Faker
@@ -9,10 +9,10 @@ from faker import Faker
 class ProductModelTests(TestCase):
 
     def setUp(self):
-        self.product = ProductFactory()
         self.fake = Faker()
+        self.product = ProductFactory()
 
-    def test_product_model_create_product(self):
+    def test_product_model_create(self):
         self.assertIsInstance(self.product, Product)
         self.assertIsNotNone(self.product.pk)
         self.assertIsNotNone(self.product.name)
@@ -67,5 +67,20 @@ class ProductModelTests(TestCase):
             self.product.fat = self.fake.word()
             self.product.full_clean()
 
+
+class MealModelTests(TestCase):
+
+    def setUp(self):
+        self.fake = Faker()
+        self.product = ProductFactory()
+        self.user = CustomUserFactory()
+        self.meal = MealFactory(user=self.user, product=self.product)
+        self.meal.product.set([self.product])
+
+    def test_meal_model_create(self):
+        self.assertIsInstance(self.meal, Meal)
+        self.assertEqual(self.meal.user, self.user)
+        self.assertEqual(self.meal.product.count(), 1)
+        self.assertIn(self.product, self.meal.product.all())
 
 
