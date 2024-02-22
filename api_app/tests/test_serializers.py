@@ -69,7 +69,7 @@ class ProductSerializerTests(TestCase):
         cls.product_data = ProductFactory()
         cls.serializer = ProductSerializer(instance=cls.product_data)
         cls.serializer_input_data = {
-            'name': cls.fake.text(max_nb_chars=255),
+            'name': cls.fake.word(),
             'serving_size': cls.fake.random_int(min=1, max=5000),
             'calories': cls.fake.random_int(min=1, max=10000),
             'protein': cls.fake.pyfloat(left_digits=2, right_digits=2, positive=True),

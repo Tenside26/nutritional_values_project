@@ -85,7 +85,7 @@ class ProductViewsTests(TestCase):
 
         self.product = ProductFactory()
         self.test_product_data = {
-            'name': self.fake.text(max_nb_chars=255),
+            'name': self.fake.word(),
             'serving_size': self.fake.random_int(min=1, max=2000),
             'calories': self.fake.random_int(min=1, max=2000),
             'protein': self.fake.pyfloat(left_digits=2, right_digits=2, positive=True),
