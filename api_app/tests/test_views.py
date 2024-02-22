@@ -156,4 +156,13 @@ class ProductViewsTests(TestCase):
             self.detail_url = reverse('meal-detail', args=[self.meal.pk])
             self.list_url = reverse('meal-list')
 
+        def test_api_view_meal_list_get(self):
+            response = self.client.get(self.list_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+            expected_meals = Meal.objects.all()
+            serialized_data = MealSerializer(expected_meals, many=True).data
+            self.assertEqual(response.data['count'], len(expected_meals))
+            self.assertEqual(response.data['next'], None)
+            self.assertEqual(response.data['previous'], None)
+            self.assertEqual(response.data['results'], serialized_data)
