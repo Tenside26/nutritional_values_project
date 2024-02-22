@@ -160,9 +160,17 @@ class ProductViewsTests(TestCase):
             response = self.client.get(self.list_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-            expected_meals = Meal.objects.all()
-            serialized_data = MealSerializer(expected_meals, many=True).data
-            self.assertEqual(response.data['count'], len(expected_meals))
+            expected_meal = Meal.objects.all()
+            serialized_data = MealSerializer(expected_meal, many=True).data
+            self.assertEqual(response.data['count'], len(expected_meal))
             self.assertEqual(response.data['next'], None)
             self.assertEqual(response.data['previous'], None)
             self.assertEqual(response.data['results'], serialized_data)
+
+        def test_api_view_meal_detail_get(self):
+            response = self.client.get(self.detail_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            expected_meal = Meal.objects.get(pk=self.meal.pk)
+            serialized_data = MealSerializer(expected_meal).data
+            self.assertEqual(response.data, serialized_data)
