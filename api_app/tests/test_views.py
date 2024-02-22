@@ -62,7 +62,7 @@ class CustomUserViewsTests(TestCase):
             'email': self.test_user_data["email"],
         }
 
-        response = self.client.put(self.detail_url, data=updated_data, format='json')
+        response = self.client.patch(self.detail_url, data=updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         updated_user = CustomUser.objects.get(pk=self.user.pk)
@@ -126,16 +126,16 @@ class ProductViewsTests(TestCase):
     def test_api_view_product_update_put_patch(self):
         updated_data = {
             'name': self.test_product_data["name"],
-            'calories': self.test_product_data["calories"],
+            'serving_size': self.test_product_data["serving_size"],
         }
 
-        response = self.client.put(self.detail_url, data=updated_data, format='json')
+        response = self.client.patch(self.detail_url, data=updated_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_product = Product.objects.get(pk=self.product.pk)
         serialized_data = ProductSerializer(updated_product).data
         self.assertEqual(response.data, serialized_data)
         self.assertEqual(updated_product.name, self.test_product_data["name"])
-        self.assertEqual(updated_product.calories, self.test_product_data["calories"])
+        self.assertEqual(updated_product.serving_size, self.test_product_data["serving_size"])
 
     def test_api_view_product_delete(self):
         response = self.client.delete(self.detail_url)
