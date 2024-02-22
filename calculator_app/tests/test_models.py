@@ -91,4 +91,11 @@ class MealModelTests(TestCase):
         self.assertIn(self.product, self.meal.product.all())
         self.assertIn(self.new_product, self.meal.product.all())
 
+    def test_meal_model_related_name_for_user(self):
+        self.assertIn(self.meal, self.user.meal_user.all())
 
+    def test_meal_model_remove_product_from_meal(self):
+        self.meal.product.remove(self.product)
+
+        self.assertEqual(self.meal.product.count(), 0)
+        self.assertNotIn(self.product, self.meal.product.all())
