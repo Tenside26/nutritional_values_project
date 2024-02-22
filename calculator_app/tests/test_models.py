@@ -83,4 +83,12 @@ class MealModelTests(TestCase):
         self.assertEqual(self.meal.product.count(), 1)
         self.assertIn(self.product, self.meal.product.all())
 
+    def test_meal_model_with_multiple_products(self):
+        self.new_product = ProductFactory()
+        self.meal.product.add(self.new_product)
+
+        self.assertEqual(self.meal.product.count(), 2)
+        self.assertIn(self.product, self.meal.product.all())
+        self.assertIn(self.new_product, self.meal.product.all())
+
 
