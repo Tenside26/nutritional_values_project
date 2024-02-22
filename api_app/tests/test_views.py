@@ -4,11 +4,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from users_app.models import CustomUser
-from calculator_app.models import Product
+from calculator_app.models import Product, Meal
 from faker import Faker
-from api_app.serializers import CustomUserSerializer, ProductSerializer
+from api_app.serializers import CustomUserSerializer, ProductSerializer, MealSerializer
 from users_app.factories import CustomUserFactory
-from calculator_app.factories import ProductFactory
+from calculator_app.factories import ProductFactory, MealFactory
 
 
 class CustomUserViewsTests(TestCase):
@@ -141,3 +141,19 @@ class ProductViewsTests(TestCase):
         response = self.client.delete(self.detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    class MealViewsTests(TestCase):
+
+        def setUp(self):
+            self.client = APIClient()
+            self.fake = Faker()
+
+            self.product = ProductFactory()
+            self.user = CustomUserFactory()
+            self.meal = MealFactory(user=self.user, product=self.product)
+            self.meal.product.set([self.product])
+
+            self.detail_url = reverse('meal-detail', args=[self.meal.pk])
+            self.list_url = reverse('meal-list')
+
+
