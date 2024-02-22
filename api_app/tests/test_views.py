@@ -18,7 +18,7 @@ class CustomUserViewsTests(TestCase):
         self.fake = Faker()
 
         self.user = CustomUserFactory()
-        self.test_user_data = {
+        self.input_user_data = {
             'username': self.fake.user_name(),
             'first_name': self.fake.first_name(),
             'last_name': self.fake.last_name(),
@@ -48,7 +48,7 @@ class CustomUserViewsTests(TestCase):
         self.assertEqual(response.data, serialized_data)
 
     def test_user_create_api_view_post(self):
-        response = self.client.post(self.list_url, self.test_user_data, format='json')
+        response = self.client.post(self.list_url, self.input_user_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -58,8 +58,8 @@ class CustomUserViewsTests(TestCase):
 
     def test_user_update_api_view_put_patch(self):
         updated_data = {
-            'username': self.test_user_data["username"],
-            'email': self.test_user_data["email"],
+            'username': self.input_user_data["username"],
+            'email': self.input_user_data["email"],
         }
 
         response = self.client.patch(self.detail_url, data=updated_data, format='json')
@@ -68,8 +68,8 @@ class CustomUserViewsTests(TestCase):
         updated_user = CustomUser.objects.get(pk=self.user.pk)
         serialized_data = CustomUserSerializer(updated_user).data
         self.assertEqual(response.data, serialized_data)
-        self.assertEqual(updated_user.username, self.test_user_data["username"])
-        self.assertEqual(updated_user.email, self.test_user_data["email"])
+        self.assertEqual(updated_user.username, self.input_user_data["username"])
+        self.assertEqual(updated_user.email, self.input_user_data["email"])
 
     def test_user_destroy_api_view_delete(self):
         response = self.client.delete(self.detail_url)
@@ -84,7 +84,7 @@ class ProductViewsTests(TestCase):
         self.fake = Faker()
 
         self.product = ProductFactory()
-        self.test_product_data = {
+        self.input_product_data = {
             'name': self.fake.word(),
             'serving_size': self.fake.random_int(min=1, max=2000),
             'calories': self.fake.random_int(min=1, max=2000),
@@ -116,7 +116,7 @@ class ProductViewsTests(TestCase):
         self.assertEqual(response.data, serialized_data)
 
     def test_api_view_product_create_post(self):
-        response = self.client.post(self.list_url, self.test_product_data, format='json')
+        response = self.client.post(self.list_url, self.input_product_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         expected_product = Product.objects.get(pk=response.data['pk'])
@@ -125,8 +125,8 @@ class ProductViewsTests(TestCase):
 
     def test_api_view_product_update_put_patch(self):
         updated_data = {
-            'name': self.test_product_data["name"],
-            'serving_size': self.test_product_data["serving_size"],
+            'name': self.input_product_data["name"],
+            'serving_size': self.input_product_data["serving_size"],
         }
 
         response = self.client.patch(self.detail_url, data=updated_data, format='json')
@@ -134,43 +134,55 @@ class ProductViewsTests(TestCase):
         updated_product = Product.objects.get(pk=self.product.pk)
         serialized_data = ProductSerializer(updated_product).data
         self.assertEqual(response.data, serialized_data)
-        self.assertEqual(updated_product.name, self.test_product_data["name"])
-        self.assertEqual(updated_product.serving_size, self.test_product_data["serving_size"])
+        self.assertEqual(updated_product.name, self.input_product_data["name"])
+        self.assertEqual(updated_product.serving_size, self.input_product_data["serving_size"])
 
     def test_api_view_product_delete(self):
         response = self.client.delete(self.detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    class MealViewsTests(TestCase):
 
-        def setUp(self):
-            self.client = APIClient()
-            self.fake = Faker()
+class MealViewsTests(TestCase):
 
-            self.product = ProductFactory()
-            self.user = CustomUserFactory()
-            self.meal = MealFactory(user=self.user, product=self.product)
-            self.meal.product.set([self.product])
+    def setUp(self):
+        self.client = APIClient()
+        self.fake = Faker()
 
-            self.detail_url = reverse('meal-detail', args=[self.meal.pk])
-            self.list_url = reverse('meal-list')
+        self.product = ProductFactory()
+        self.user = CustomUserFactory()
+        self.meal = MealFactory(user=self.user)
+        self.meal.product.set([self.product])
 
-        def test_api_view_meal_list_get(self):
-            response = self.client.get(self.list_url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.detail_url = reverse('meal-detail', args=[self.meal.pk])
+        self.list_url = reverse('meal-list')
 
-            expected_meal = Meal.objects.all()
-            serialized_data = MealSerializer(expected_meal, many=True).data
-            self.assertEqual(response.data['count'], len(expected_meal))
-            self.assertEqual(response.data['next'], None)
-            self.assertEqual(response.data['previous'], None)
-            self.assertEqual(response.data['results'], serialized_data)
+    def test_api_view_meal_list_get(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        def test_api_view_meal_detail_get(self):
-            response = self.client.get(self.detail_url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected_meal = Meal.objects.all()
+        serialized_data = MealSerializer(expected_meal, many=True).data
+        self.assertEqual(response.data['count'], len(expected_meal))
+        self.assertEqual(response.data['next'], None)
+        self.assertEqual(response.data['previous'], None)
+        self.assertEqual(response.data['results'], serialized_data)
 
-            expected_meal = Meal.objects.get(pk=self.meal.pk)
-            serialized_data = MealSerializer(expected_meal).data
-            self.assertEqual(response.data, serialized_data)
+    def test_api_view_meal_detail_get(self):
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_meal = Meal.objects.get(pk=self.meal.pk)
+        serialized_data = MealSerializer(expected_meal).data
+        self.assertEqual(response.data, serialized_data)
+
+    def test_api_view_meal_create_post(self):
+        pass
+
+    def test_api_view_meal_update_put_patch(self):
+        pass
+
+    def test_api_view_meal_delete(self):
+        response = self.client.delete(self.detail_url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
