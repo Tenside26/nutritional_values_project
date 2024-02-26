@@ -1,6 +1,6 @@
 from django.test import TestCase
-from calculator_app.factories import ProductFactory
-from calculator_app.models import Product
+from calculator_app.factories import ProductFactory, MealFactory, CustomUserFactory
+from calculator_app.models import Product, Meal, CustomUser
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from faker import Faker
@@ -9,10 +9,10 @@ from faker import Faker
 class ProductModelTests(TestCase):
 
     def setUp(self):
-        self.product = ProductFactory()
         self.fake = Faker()
+        self.product = ProductFactory()
 
-    def test_product_model_create_product(self):
+    def test_product_model_create(self):
         self.assertIsInstance(self.product, Product)
         self.assertIsNotNone(self.product.pk)
         self.assertIsNotNone(self.product.name)
@@ -68,4 +68,34 @@ class ProductModelTests(TestCase):
             self.product.full_clean()
 
 
+class MealModelTests(TestCase):
 
+    def setUp(self):
+        self.fake = Faker()
+        self.product = ProductFactory()
+        self.user = CustomUserFactory()
+        self.meal = MealFactory(user=self.user, product=self.product)
+        self.meal.product.set([self.product])
+
+    def test_meal_model_create(self):
+        self.assertIsInstance(self.meal, Meal)
+        self.assertEqual(self.meal.user, self.user)
+        self.assertEqual(self.meal.product.count(), 1)
+        self.assertIn(self.product, self.meal.product.all())
+
+    def test_meal_model_with_multiple_products(self):
+        self.new_product = ProductFactory()
+        self.meal.product.add(self.new_product)
+
+        self.assertEqual(self.meal.product.count(), 2)
+        self.assertIn(self.product, self.meal.product.all())
+        self.assertIn(self.new_product, self.meal.product.all())
+
+    def test_meal_model_related_name_for_user(self):
+        self.assertIn(self.meal, self.user.meal_user.all())
+
+    def test_meal_model_remove_product_from_meal(self):
+        self.meal.product.remove(self.product)
+
+        self.assertEqual(self.meal.product.count(), 0)
+        self.assertNotIn(self.product, self.meal.product.all())
