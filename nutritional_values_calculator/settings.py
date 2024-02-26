@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users_app',
     'calculator_app',
     'rest_framework',
+    "rest_framework.authtoken",
     'api_app',
     'django_extensions',
 ]

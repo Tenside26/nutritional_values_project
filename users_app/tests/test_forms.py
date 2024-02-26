@@ -17,11 +17,8 @@ class UserLoginFormTests(TestCase):
     def test_login_valid_data(self):
         form_data = {'username': self.test_user.username,
                      'password': self.test_user.password}
-        print(form_data)
+
         form = UserLoginForm(data=form_data)
-        if not form.is_valid():
-            print(form.errors)
-            self.fail(f"Form is not valid: {form.errors}")
 
         self.assertTrue(form.is_valid())
 
