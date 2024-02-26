@@ -1,9 +1,10 @@
 from django.test import TestCase
-from django.urls import reverse, resolve
-from users_app.forms import UserRegisterForm
-from users_app.views import register_page
 from rest_framework.test import APIClient
 from users_app.factories import CustomUserFactory
+from faker import Faker
+from django.urls import reverse
+from rest_framework import status
+from users_app.models import CustomUser
 
 
 class LoginPageTest(TestCase):
@@ -18,20 +19,29 @@ class LoginPageTest(TestCase):
         self.assertIn('token', response.data)
 
 
-class RegisterPageTest(TestCase):
+class RegisterAPIViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.existing_user = CustomUserFactory()
+        cls.url = reverse('register')
+
     def setUp(self):
-        self.register_url = reverse('register')
+        self.fake = Faker()
+        new_password = self.fake.password(length=40)
+        self.input_data = {'username': self.fake.user_name(),
+                           'password1': new_password,
+                           'password2': new_password,
+                           'first_name': self.fake.first_name(),
+                           'last_name': self.fake.last_name(),
+                           'email': self.fake.email()}
 
-    def test_register_page_template_render_correctly(self):
-        response = self.client.get(self.register_url)
+    def test_register_valid_data(self):
+        response = self.client.post(self.url, self.input_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertTemplateUsed(response,'register.html')
+        user = CustomUser.objects.get(username=self.input_data['username'], email=self.input_data['email'])
 
-    def test_register_page_url(self):
-        found = resolve('/register')
-        self.assertEqual(found.func, register_page)
-
-    def test_register_page_renders_correct_form(self):
-        response = self.client.post(self.register_url)
-
-        self.assertIsInstance(response.context['form'], UserRegisterForm)
+        self.assertEqual(user.username, self.input_data['username'])
+        self.assertEqual(user.first_name, self.input_data['first_name'])
+        self.assertEqual(user.last_name, self.input_data['last_name'])
+        self.assertEqual(user.email, self.input_data['email'])
