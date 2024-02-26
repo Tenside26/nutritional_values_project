@@ -6,7 +6,7 @@ import requests
 def calculator_page(request):
 
     template = "calculator.html"
-    api_url = "http://127.0.0.1:8000/api/products-list"
+    api_url = "http://127.0.0.1:8000/api/products"
 
     try:
         response = requests.get(api_url)
