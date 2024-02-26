@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect
-from .forms import UserRegisterForm
-from django.contrib import messages
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import LoginSerializer
+from .serializers import LoginSerializer, RegisterSerializer
+from rest_framework import status
 
 
 class LoginAPIView(ObtainAuthToken, APIView):
@@ -19,18 +18,10 @@ class LoginAPIView(ObtainAuthToken, APIView):
         return Response({'token': token.key})
 
 
-def register_page(request):
-
-    template = "register.html"
-    form = UserRegisterForm
-
-    if request.method == "POST":
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect("login")
-        else:
-            form = UserRegisterForm()
-
-    return render(request, template, {"form": form})
+class RegisterAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Your account has been successfully created!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
