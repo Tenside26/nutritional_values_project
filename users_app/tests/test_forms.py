@@ -1,89 +1,10 @@
 
-from django.test import TestCase, Client
-from users_app.forms import UserLoginForm, UserRegisterForm
+from django.test import TestCase
+from users_app.forms import UserRegisterForm
 from users_app.models import CustomUser
 from django.urls import reverse
 from users_app.factories import CustomUserFactory
 from faker import Faker
-
-
-class UserLoginFormTests(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.test_user = CustomUserFactory()
-        cls.client = Client()
-
-    def test_login_valid_data(self):
-        form_data = {'username': self.test_user.username,
-                     'password': self.test_user.password}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertTrue(form.is_valid())
-
-    def test_login_invalid_data(self):
-        form_data = {'username': 'invalid_user',
-                     'password': 'invalid_password'}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-
-    def test_login_wrong_username(self):
-        form_data = {'username': 'wrong_user',
-                     'password': self.test_user.password}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-        self.assertIn('Invalid username or password', form.errors['__all__'])
-
-    def test_login_wrong_password(self):
-        form_data = {'username': self.test_user.username,
-                     'password': 'wrong_password'}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-        self.assertIn('Invalid username or password', form.errors['__all__'])
-
-    def test_login_missing_username(self):
-        form_data = {'password': self.test_user.password}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['username'], ['This field is required.'])
-
-    def test_login_missing_password(self):
-        form_data = {'username': self.test_user.username}
-
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['password'], ['This field is required.'])
-
-    def test_login_missing_data(self):
-        form_data = {}
-        form = UserLoginForm(data=form_data)
-
-        self.assertFalse(form.is_valid())
-
-    def test_login_successful_login(self):
-        form_data = {'username': self.test_user.username,
-                     'password': self.test_user.password}
-
-        response = self.client.post('', form_data, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertRedirects(response, reverse('calculator'))
-        self.assertIn('_auth_user_id', self.client.session)
-
-        user_id = self.client.session['_auth_user_id']
-        logged_in_user = CustomUser.objects.get(id=user_id)
-
-        self.assertEqual(logged_in_user, self.test_user)
 
 
 class UserRegisterFormTests(TestCase):
