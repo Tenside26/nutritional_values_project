@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from users_app.models import CustomUser
 from rest_framework.serializers import ValidationError
-from users_app.serializers import RegisterSerializer
+from users_app.serializers import RegisterSerializer, LoginSerializer
 
 
 class LoginPageTest(TestCase):
@@ -14,15 +14,22 @@ class LoginPageTest(TestCase):
     def setUpTestData(cls):
         cls.url = reverse('login')
         cls.client = APIClient()
+        cls.fake = Faker()
+        cls.user = CustomUserFactory()
 
-    def setUp(self):
-        self.user = CustomUserFactory()
-
-    def test_login_view(self):
+    def test_login_view_existing_user(self):
         data = {'username': self.user.username, 'password': self.user.password}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertIn('token', response.data)
+
+    def test_login_view_non_existing_user(self):
+        data = {'username': self.fake.user_name, 'password': self.fake.password}
+
+        with self.assertRaises(ValidationError) as context:
+            serializer = LoginSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.assertEqual(str(context.exception), "Invalid credentials")
 
 
 class RegisterAPIViewTest(TestCase):
