@@ -8,6 +8,9 @@ from rest_framework import status
 
 
 class LoginAPIView(ObtainAuthToken, APIView):
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -19,6 +22,9 @@ class LoginAPIView(ObtainAuthToken, APIView):
 
 
 class RegisterAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
 
