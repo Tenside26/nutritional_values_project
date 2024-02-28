@@ -10,13 +10,17 @@ from users_app.serializers import RegisterSerializer
 
 
 class LoginPageTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('login')
+        cls.client = APIClient()
+
     def setUp(self):
         self.user = CustomUserFactory()
-        self.client = APIClient()
 
     def test_login_view(self):
         data = {'username': self.user.username, 'password': self.user.password}
-        response = self.client.post('/login', data, format='json')
+        response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertIn('token', response.data)
 
@@ -26,6 +30,7 @@ class RegisterAPIViewTest(TestCase):
     def setUpTestData(cls):
         cls.existing_user = CustomUserFactory()
         cls.url = reverse('register')
+        cls.client = APIClient()
 
     def setUp(self):
         self.fake = Faker()
@@ -55,6 +60,17 @@ class RegisterAPIViewTest(TestCase):
 
     def test_register_taken_username(self):
         self.input_data["username"] = self.existing_user.username
+        response = self.client.post(self.url, self.input_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.assertRaises(ValidationError) as context:
+            serializer = RegisterSerializer(data=self.input_data)
+            serializer.is_valid(raise_exception=True)
+            self.assertEqual(context.exception.status_code, 202)
+
+    def test_register_taken_email(self):
+        self.input_data["email"] = self.existing_user.email
         response = self.client.post(self.url, self.input_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
