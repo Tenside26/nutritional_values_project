@@ -5,6 +5,8 @@ from faker import Faker
 from django.urls import reverse
 from rest_framework import status
 from users_app.models import CustomUser
+from rest_framework.serializers import ValidationError
+from users_app.serializers import RegisterSerializer
 
 
 class LoginPageTest(TestCase):
@@ -51,5 +53,14 @@ class RegisterAPIViewTest(TestCase):
         response = self.client.post(self.url, self.input_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    
+    def test_register_taken_username(self):
+        self.input_data["username"] = self.existing_user.username
+        response = self.client.post(self.url, self.input_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.assertRaises(ValidationError) as context:
+            serializer = RegisterSerializer(data=self.input_data)
+            serializer.is_valid(raise_exception=True)
+            self.assertEqual(context.exception.status_code, 202)
 
