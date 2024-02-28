@@ -80,3 +80,15 @@ class RegisterAPIViewTest(TestCase):
             serializer.is_valid(raise_exception=True)
             self.assertEqual(context.exception.status_code, 202)
 
+    def test_register_password_mismatch(self):
+        self.input_data["password1"] = self.fake.password(length=40)
+        response = self.client.post(self.url, self.input_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        with self.assertRaises(ValidationError) as context:
+            serializer = RegisterSerializer(data=self.input_data)
+            serializer.is_valid(raise_exception=True)
+            self.assertEqual(str(context.exception), "Passwords do not match.")
+
+
