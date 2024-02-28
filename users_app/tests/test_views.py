@@ -63,13 +63,15 @@ class RegisterAPIViewTest(TestCase):
     def test_register_invalid_data(self):
         self.input_data["username"] = ""
         response = self.client.post(self.url, self.input_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual("", self.input_data['username'])
 
     def test_register_taken_username(self):
         self.input_data["username"] = self.existing_user.username
         response = self.client.post(self.url, self.input_data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         with self.assertRaises(ValidationError) as context:
             serializer = RegisterSerializer(data=self.input_data)
@@ -80,7 +82,7 @@ class RegisterAPIViewTest(TestCase):
         self.input_data["email"] = self.existing_user.email
         response = self.client.post(self.url, self.input_data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         with self.assertRaises(ValidationError) as context:
             serializer = RegisterSerializer(data=self.input_data)
@@ -91,7 +93,7 @@ class RegisterAPIViewTest(TestCase):
         self.input_data["password1"] = self.fake.password(length=40)
         response = self.client.post(self.url, self.input_data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         with self.assertRaises(ValidationError) as context:
             serializer = RegisterSerializer(data=self.input_data)
