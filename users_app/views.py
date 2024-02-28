@@ -21,7 +21,11 @@ class LoginAPIView(ObtainAuthToken, APIView):
 class RegisterAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif serializer.is_valid():
             serializer.save()
-            return Response({'message': 'Your account has been successfully created!'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_202_ACCEPTED)
+

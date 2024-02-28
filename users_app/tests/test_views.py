@@ -37,7 +37,7 @@ class RegisterAPIViewTest(TestCase):
 
     def test_register_valid_data(self):
         response = self.client.post(self.url, self.input_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         user = CustomUser.objects.get(username=self.input_data['username'], email=self.input_data['email'])
 
@@ -45,3 +45,11 @@ class RegisterAPIViewTest(TestCase):
         self.assertEqual(user.first_name, self.input_data['first_name'])
         self.assertEqual(user.last_name, self.input_data['last_name'])
         self.assertEqual(user.email, self.input_data['email'])
+
+    def test_register_invalid_data(self):
+        self.input_data["username"] = ""
+        response = self.client.post(self.url, self.input_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    
+

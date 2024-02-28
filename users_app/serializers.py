@@ -30,12 +30,16 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Username is already taken.")
+            error = serializers.ValidationError()
+            error.status_code = 202
+            raise error
         return value
 
     def validate_email(self, value):
         if CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email is already taken.")
+            error = serializers.ValidationError()
+            error.status_code = 202
+            raise error
         return value
 
     def validate(self, data):
