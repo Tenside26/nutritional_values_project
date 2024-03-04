@@ -1,4 +1,4 @@
-
+from rest_framework.authtoken.models import Token
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -18,6 +18,7 @@ class CustomUserViewsTests(TestCase):
         self.fake = Faker()
 
         self.user = CustomUserFactory()
+        self.token = Token.objects.create(user=self.user)
         self.input_user_data = {
             'username': self.fake.user_name(),
             'first_name': self.fake.first_name(),
@@ -27,6 +28,7 @@ class CustomUserViewsTests(TestCase):
 
         self.list_url = reverse('user-list')
         self.detail_url = reverse('user-detail', args=[self.user.pk])
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
     def test_user_list_api_view_get(self):
         response = self.client.get(self.list_url)
@@ -82,6 +84,8 @@ class ProductViewsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.fake = Faker()
+        self.user = CustomUserFactory()
+        self.token = Token.objects.create(user=self.user)
 
         self.product = ProductFactory()
         self.input_product_data = {
@@ -95,6 +99,7 @@ class ProductViewsTests(TestCase):
 
         self.detail_url = reverse('product-detail', args=[self.product.pk])
         self.list_url = reverse('product-list')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
     def test_api_view_product_list_get(self):
         response = self.client.get(self.list_url)
@@ -151,11 +156,13 @@ class MealViewsTests(TestCase):
 
         self.product = ProductFactory()
         self.user = CustomUserFactory()
+        self.token = Token.objects.create(user=self.user)
         self.meal = MealFactory(user=self.user)
         self.meal.product.set([self.product])
 
         self.detail_url = reverse('meal-detail', args=[self.meal.pk])
         self.list_url = reverse('meal-list')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
     def test_api_view_meal_list_get(self):
         response = self.client.get(self.list_url)

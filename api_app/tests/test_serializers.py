@@ -5,6 +5,8 @@ from calculator_app.models import Product
 from faker import Faker
 from users_app.factories import CustomUserFactory
 from calculator_app.factories import ProductFactory, MealFactory
+from django.utils import timezone
+import pytz
 
 
 class CustomUserSerializerTests(TestCase):
@@ -150,8 +152,12 @@ class MealSerializerTests(TestCase):
         cls.meal_serializer = MealSerializer(instance=cls.meal_data)
 
     def test_meal_serialization(self):
+        serialized_date = timezone.datetime.fromisoformat(self.meal_serializer.data['date']).replace(tzinfo=pytz.UTC)
+        expected_date = self.meal_data.date.replace(tzinfo=pytz.UTC)
+
         self.assertEqual(self.meal_serializer.data['user'], self.user_serializer.data)
         self.assertEqual(self.meal_serializer.data['product'], [self.product_serializer.data])
+        self.assertEqual(serialized_date, expected_date)
 
     def test_meal_deserialization(self):
         pass
@@ -162,9 +168,13 @@ class MealSerializerTests(TestCase):
     def test_meal_serialization_incorrect_product_data(self):
         self.assertNotEqual(self.meal_serializer.data['product'][0]["name"], self.fake.word())
 
+    def test_meal_serialization_incorrect_date_data(self):
+        self.assertNotEqual(self.meal_serializer.data['date'], self.fake.date_time_this_decade())
+
     def test_meal_serialization_missing_data(self):
         serialized_data = MealSerializer(data={})
 
         self.assertFalse(serialized_data.is_valid())
         self.assertIsNone(serialized_data.validated_data.get("user"))
         self.assertIsNone(serialized_data.validated_data.get("product"))
+        self.assertIsNone(serialized_data.validated_data.get("date"))

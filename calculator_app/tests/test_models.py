@@ -1,6 +1,6 @@
 from django.test import TestCase
 from calculator_app.factories import ProductFactory, MealFactory, CustomUserFactory
-from calculator_app.models import Product, Meal, CustomUser
+from calculator_app.models import Product, Meal
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from faker import Faker

@@ -21,5 +21,6 @@ class MealFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(CustomUserFactory)
     product = factory.RelatedFactoryList(ProductFactory, factory_related_name='meal')
+    date = factory.Faker("date_time_this_decade")
 
 
