@@ -15,3 +15,4 @@ class Product(models.Model):
 class Meal(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="meal_user")
     product = models.ManyToManyField(Product)
+    date = models.DateTimeField(auto_now_add=True)
