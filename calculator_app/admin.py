@@ -9,4 +9,4 @@ class AdminProduct(admin.ModelAdmin):
 
 @admin.register(Meal)
 class AdminMeal(admin.ModelAdmin):
-    list_display = ["user"]
+    list_display = ["user", "date"]

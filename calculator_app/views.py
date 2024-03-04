@@ -1,31 +1,21 @@
-from django.shortcuts import render
-from django.http import HttpResponseServerError
-import requests
+from rest_framework import filters
+from rest_framework.generics import ListAPIView
+from datetime import datetime
+from calculator_app.models import Meal
+from api_app.serializers import MealSerializer
 
 
-def calculator_page(request):
+class MealUserView(ListAPIView):
+    serializer_class = MealSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_fields = ['selected_date']
 
-    template = "calculator.html"
-    api_url = "http://127.0.0.1:8000/api/products"
+    def get_queryset(self):
+        selected_date = self.request.query_params.get('selected_date', None)
+        queryset = Meal.objects.filter(user=self.request.user)
 
-    try:
-        response = requests.get(api_url)
+        if selected_date:
+            selected_datetime = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            queryset = queryset.filter(date=selected_datetime)
 
-        if response.status_code == 200:
-            api_data = response.json()
-
-            return render(request, template, {'api_data': api_data})
-        else:
-            return HttpResponseServerError(f"Error fetching data from API. Status code: {response.status_code}")
-
-    except requests.exceptions.RequestException as e:
-
-        return HttpResponseServerError(f"Error fetching data from API: {e}")
-
-    except ValueError as e:
-
-        return HttpResponseServerError(f"Error parsing JSON data: {e}")
-
-    except Exception as e:
-
-        return HttpResponseServerError(f"An unexpected error occurred: {e}")
+        return queryset
