@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users_app',
     'calculator_app',
     'rest_framework',
+    "rest_framework.authtoken",
     'api_app',
     'django_extensions',
 ]
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'nutritional_values_calculator.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [USERS_APP_TEMPLATES, CALCULATOR_APP_TEMPLATES],
+        'DIRS': [CALCULATOR_APP_TEMPLATES],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,4 +140,10 @@ AUTH_USER_MODEL = 'users_app.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }

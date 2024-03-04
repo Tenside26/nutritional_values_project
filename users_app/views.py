@@ -1,40 +1,37 @@
-from django.shortcuts import render, redirect
-from .forms import UserLoginForm, UserRegisterForm
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from .serializers import LoginSerializer, RegisterSerializer
+from rest_framework import status
 
 
-def login_page(request):
+class LoginAPIView(ObtainAuthToken, APIView):
+    authentication_classes = []
+    permission_classes = []
 
-    template = "login.html"
-    form = UserLoginForm
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    if request.method == "POST":
-        form = UserLoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
 
-            if user is not None:
-                login(request, user)
-                return redirect("calculator")
-
-    return render(request, template, {"form": form})
+        return Response({'token': token.key})
 
 
-def register_page(request):
+class RegisterAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
 
-    template = "register.html"
-    form = UserRegisterForm
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
 
-    if request.method == "POST":
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect("login")
-        else:
-            form = UserRegisterForm()
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_202_ACCEPTED)
 
-    return render(request, template, {"form": form})
+        elif serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
+
