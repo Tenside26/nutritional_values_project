@@ -1,7 +1,10 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import MealUserViewSet
 
+router = DefaultRouter()
+router.register(r'user-meals', MealUserViewSet, basename='user-meals')
 
 urlpatterns = [
-    path('', views.calculator_page, name="calculator")
+    path('', include(router.urls)),
 ]

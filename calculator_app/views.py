@@ -1,21 +1,24 @@
-from rest_framework import filters
-from rest_framework.generics import ListAPIView
-from datetime import datetime
+
+from rest_framework.viewsets import ModelViewSet
 from calculator_app.models import Meal
 from api_app.serializers import MealSerializer
+from django_filters import rest_framework
 
 
-class MealUserView(ListAPIView):
+class MealUserFilter(rest_framework.FilterSet):
+    date = rest_framework.DateFilter(field_name='date', lookup_expr='date')
+
+    class Meta:
+        model = Meal
+        fields = ['date']
+
+
+class MealUserViewSet(ModelViewSet):
     serializer_class = MealSerializer
-    filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['selected_date']
+    filter_backends = [rest_framework.DjangoFilterBackend]
+    filterset_class = MealUserFilter
 
     def get_queryset(self):
-        selected_date = self.request.query_params.get('selected_date', None)
         queryset = Meal.objects.filter(user=self.request.user)
-
-        if selected_date:
-            selected_datetime = datetime.strptime(selected_date, "%Y-%m-%d").date()
-            queryset = queryset.filter(date=selected_datetime)
 
         return queryset
