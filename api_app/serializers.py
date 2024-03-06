@@ -23,4 +23,4 @@ class MealSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meal
-        fields = ("pk", "user", "product", "date")
+        fields = ("pk", "user", "title", "product", "date")
