@@ -6,11 +6,13 @@ from django_filters import rest_framework
 
 
 class MealUserFilter(rest_framework.FilterSet):
-    date = rest_framework.DateFilter(field_name='date', lookup_expr='date')
+    date_gte = rest_framework.DateFilter(field_name='date', lookup_expr='gte')
+    date_lte = rest_framework.DateFilter(field_name='date', lookup_expr='lte')
+    product_name = rest_framework.CharFilter(field_name='product__name', lookup_expr='icontains')
 
     class Meta:
         model = Meal
-        fields = ['date']
+        fields = ['date_gte', 'date_lte', 'product_name']
 
 
 class MealUserViewSet(ModelViewSet):
