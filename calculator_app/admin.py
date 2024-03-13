@@ -1,10 +1,15 @@
 from django.contrib import admin
-from .models import Product, Meal
+from .models import Product, Meal, UserModifiedProduct
 
 
 @admin.register(Product)
 class AdminProduct(admin.ModelAdmin):
     list_display = ["name", "serving_size", "calories", "protein", "carbohydrate", "fat",]
+
+
+@admin.register(UserModifiedProduct)
+class AdminUserModifiedProduct(admin.ModelAdmin):
+    list_display = ["name", "product", "serving_size", "calories", "protein", "carbohydrate", "fat",]
 
 
 @admin.register(Meal)
