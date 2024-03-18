@@ -24,6 +24,11 @@ class UserModifiedProduct(models.Model):
 
 class Meal(models.Model):
     title = models.CharField(max_length=255, null=False, blank=False)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="meal_user")
-    product = models.ManyToManyField(UserModifiedProduct)
-    date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="related_user")
+    product = models.ForeignKey(UserModifiedProduct, on_delete=models.CASCADE, related_name="related_modified_product")
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    total_calories = models.IntegerField(default=0)
+    total_protein = models.FloatField(default=0.0)
+    total_carbohydrate = models.FloatField(default=0.0)
+    total_fat = models.FloatField(default=0.0)

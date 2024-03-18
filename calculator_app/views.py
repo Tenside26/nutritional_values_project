@@ -25,3 +25,4 @@ class MealUserViewSet(ModelViewSet):
         queryset = Meal.objects.filter(user=self.request.user)
 
         return queryset
+
