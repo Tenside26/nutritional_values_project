@@ -7,14 +7,24 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("pk", "username", "first_name", "last_name", "email")
+        fields = ("pk",
+                  "username",
+                  "first_name",
+                  "last_name",
+                  "email")
 
 
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ("pk", "name", "serving_size", "calories", "protein", "carbohydrate", "fat")
+        fields = ("pk",
+                  "name",
+                  "serving_size",
+                  "calories",
+                  "protein",
+                  "carbohydrate",
+                  "fat")
 
 
 class MealSerializer(serializers.ModelSerializer):
@@ -23,4 +33,13 @@ class MealSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meal
-        fields = ("pk", "user", "title", "product", "date")
+        fields = ("pk",
+                  "user",
+                  "title",
+                  "product"
+                  "date_created",
+                  "date_updated",
+                  "total_calories",
+                  "total_protein",
+                  "total_carbohydrate",
+                  "total_fat")

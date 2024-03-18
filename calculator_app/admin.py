@@ -14,4 +14,4 @@ class AdminUserModifiedProduct(admin.ModelAdmin):
 
 @admin.register(Meal)
 class AdminMeal(admin.ModelAdmin):
-    list_display = ["user", "date"]
+    list_display = ["title", "user", "date_created", "date_updated"]
