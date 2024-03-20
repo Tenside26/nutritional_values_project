@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from users_app.models import CustomUser
-from calculator_app.models import Product, Meal
+from calculator_app.models import Product, Meal, UserModifiedProduct
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -27,16 +27,31 @@ class ProductSerializer(serializers.ModelSerializer):
                   "fat")
 
 
+class UserModifiedProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+
+    class Meta:
+        model = UserModifiedProduct
+        fields = ("pk",
+                  "name",
+                  "product",
+                  "serving_size",
+                  "calories",
+                  "protein",
+                  "carbohydrate",
+                  "fat")
+
+
 class MealSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
-    product = ProductSerializer(many=True)
+    products = UserModifiedProductSerializer(many=True, required=False)
 
     class Meta:
         model = Meal
         fields = ("pk",
                   "user",
                   "title",
-                  "product"
+                  "products",
                   "date_created",
                   "date_updated",
                   "total_calories",
