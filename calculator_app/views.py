@@ -5,7 +5,7 @@ from api_app.serializers import MealSerializer, UserModifiedProductSerializer
 from django_filters import rest_framework
 from rest_framework.response import Response
 from rest_framework import status
-from .services import calculate_totals
+from .services import calculate_nutritional_values_per_serving_size, sum_meal_nutritional_values
 
 
 class MealUserFilter(rest_framework.FilterSet):
@@ -36,8 +36,9 @@ class ModifiedProductViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         product_id = request.data.get('product')
         serving_size = request.data.get('serving_size')
+        meal_pk = kwargs.get('meal_pk')
 
-        if not product_id or not serving_size:
+        if not meal_pk or not product_id or not serving_size:
             return Response({"message": "Missing required fields."},
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,13 +48,21 @@ class ModifiedProductViewSet(ModelViewSet):
             return Response({"message": "The specified product does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            meal = Meal.objects.get(pk=meal_pk)
+        except Meal.DoesNotExist:
+            return Response({"message": "The specified meal does not exist."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         if serving_size <= 0:
             return Response({"message": "Serving size must be a positive number."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        user_modified_product = UserModifiedProduct(product=product, serving_size=serving_size)
-        calculate_totals(user_modified_product)
+        user_modified_product = UserModifiedProduct(product=product, meal=meal, serving_size=serving_size)
+        calculate_nutritional_values_per_serving_size(user_modified_product)
         user_modified_product.save()
+        sum_meal_nutritional_values(meal)
+        meal.save()
 
         serializer = self.get_serializer(user_modified_product)
         headers = self.get_success_headers(serializer.data)

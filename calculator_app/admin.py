@@ -9,7 +9,7 @@ class AdminProduct(admin.ModelAdmin):
 
 @admin.register(UserModifiedProduct)
 class AdminUserModifiedProduct(admin.ModelAdmin):
-    list_display = ["name", "product", "serving_size", "calories", "protein", "carbohydrate", "fat",]
+    list_display = ["name", "product", "meal", "serving_size", "calories", "protein", "carbohydrate", "fat",]
 
 
 @admin.register(Meal)

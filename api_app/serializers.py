@@ -27,34 +27,34 @@ class ProductSerializer(serializers.ModelSerializer):
                   "fat")
 
 
-class UserModifiedProductSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
-
-    class Meta:
-        model = UserModifiedProduct
-        fields = ("pk",
-                  "name",
-                  "product",
-                  "serving_size",
-                  "calories",
-                  "protein",
-                  "carbohydrate",
-                  "fat")
-
-
 class MealSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
-    products = UserModifiedProductSerializer(many=True, required=False)
 
     class Meta:
         model = Meal
         fields = ("pk",
                   "user",
                   "title",
-                  "products",
                   "date_created",
                   "date_updated",
                   "total_calories",
                   "total_protein",
                   "total_carbohydrate",
                   "total_fat")
+
+
+class UserModifiedProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    meal = MealSerializer()
+
+    class Meta:
+        model = UserModifiedProduct
+        fields = ("pk",
+                  "name",
+                  "product",
+                  "meal",
+                  "serving_size",
+                  "calories",
+                  "protein",
+                  "carbohydrate",
+                  "fat")

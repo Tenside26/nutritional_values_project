@@ -8,4 +8,6 @@ router.register(r'modified-product', ModifiedProductViewSet, basename='modified-
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('user-meals/<int:meal_pk>/modified-product/',
+         ModifiedProductViewSet.as_view({'post': 'create'}), name='modified-product'),
 ]
