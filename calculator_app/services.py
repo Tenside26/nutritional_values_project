@@ -1,39 +1,46 @@
 from django.db.models import Sum
 from api_app.serializers import UserModifiedProductSerializer
+from .models import Meal
+from rest_framework.response import Response
+from rest_framework import status
 
 
 def calculate_nutritional_values_per_serving_size(instance):
-    if instance:
-        modified_serving_size = instance.serving_size / instance.product.serving_size
-        instance.name = instance.product.name
-        instance.calories = instance.product.calories * modified_serving_size
-        instance.protein = instance.product.protein * modified_serving_size
-        instance.carbohydrate = instance.product.carbohydrate * modified_serving_size
-        instance.fat = instance.product.fat * modified_serving_size
+    modified_serving_size = instance.serving_size / instance.product.serving_size
+    instance.name = instance.product.name
+    instance.calories = instance.product.calories * modified_serving_size
+    instance.protein = instance.product.protein * modified_serving_size
+    instance.carbohydrate = instance.product.carbohydrate * modified_serving_size
+    instance.fat = instance.product.fat * modified_serving_size
+    instance.save()
 
 
-def sum_meal_nutritional_values(instance):
-    aggregated_values = instance.modified_product.all().aggregate(
+def sum_meal_nutritional_values(meal_id):
+    meal = Meal.objects.get(id=meal_id)
+    aggregated_values = meal.modified_product.all().aggregate(
         total_calories=Sum('calories'),
         total_protein=Sum('protein'),
         total_carbohydrate=Sum('carbohydrate'),
         total_fat=Sum('fat')
     )
 
-    instance.total_calories = aggregated_values['total_calories']
-    instance.total_protein = aggregated_values['total_protein']
-    instance.total_carbohydrate = aggregated_values['total_carbohydrate']
-    instance.total_fat = aggregated_values['total_fat']
+    meal.total_calories = aggregated_values['total_calories']
+    meal.total_protein = aggregated_values['total_protein']
+    meal.total_carbohydrate = aggregated_values['total_carbohydrate']
+    meal.total_fat = aggregated_values['total_fat']
+    meal.save()
 
 
 def create_user_modified_product(request_data, meal_id):
-    request_data["meal"] = meal_id
+    request_data["meal_pk"] = meal_id
     serializer = UserModifiedProductSerializer(data=request_data)
 
     if serializer.is_valid():
         serializer.save()
         calculate_nutritional_values_per_serving_size(serializer.instance)
-        sum_meal_nutritional_values(serializer.instance.meal)
+        sum_meal_nutritional_values(meal_id)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     else:
         errors = serializer.errors
-        return errors
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)

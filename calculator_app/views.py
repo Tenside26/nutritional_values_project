@@ -1,11 +1,11 @@
 
 from rest_framework.viewsets import ModelViewSet
-from calculator_app.models import Meal, UserModifiedProduct, Product
+from calculator_app.models import Meal
 from api_app.serializers import MealSerializer, UserModifiedProductSerializer
 from django_filters import rest_framework
+from .services import create_user_modified_product
 from rest_framework.response import Response
 from rest_framework import status
-from .services import calculate_nutritional_values_per_serving_size, sum_meal_nutritional_values
 
 
 class MealUserFilter(rest_framework.FilterSet):
@@ -34,36 +34,9 @@ class ModifiedProductViewSet(ModelViewSet):
     serializer_class = UserModifiedProductSerializer
 
     def create(self, request, *args, **kwargs):
-        product_id = request.data.get('product')
-        serving_size = request.data.get('serving_size')
-        meal_pk = kwargs.get('meal_pk')
+        response = create_user_modified_product(request.data, kwargs.get('meal_pk'))
 
-        if not meal_pk or not product_id or not serving_size:
-            return Response({"message": "Missing required fields."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            return Response({"message": "The specified product does not exist."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            meal = Meal.objects.get(pk=meal_pk)
-        except Meal.DoesNotExist:
-            return Response({"message": "The specified meal does not exist."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        if serving_size <= 0:
-            return Response({"message": "Serving size must be a positive number."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        user_modified_product = UserModifiedProduct(product=product, meal=meal, serving_size=serving_size)
-        calculate_nutritional_values_per_serving_size(user_modified_product)
-        user_modified_product.save()
-        sum_meal_nutritional_values(meal)
-        meal.save()
-
-        serializer = self.get_serializer(user_modified_product)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        if isinstance(response, Response):
+            return response
+        else:
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
