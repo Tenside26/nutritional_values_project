@@ -3,6 +3,7 @@ certifi==2023.11.17
 charset-normalizer==3.3.2
 Django==5.0.1
 django-extensions==3.2.3
+django-filter==23.5
 djangorestframework==3.14.0
 factory-boy==3.3.0
 Faker==22.6.0
