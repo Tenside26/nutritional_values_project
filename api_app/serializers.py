@@ -60,7 +60,7 @@ class UserModifiedProductSerializer(serializers.ModelSerializer):
                   "carbohydrate",
                   "fat")
 
-    def validate(self, data):
+    def validate_required_fields(self, data):
         product_id = data.get('product_id')
         serving_size = data.get('serving_size')
         meal_pk = data.get('meal_pk')
@@ -68,19 +68,27 @@ class UserModifiedProductSerializer(serializers.ModelSerializer):
         if not meal_pk or not product_id or not serving_size:
             raise ValidationError({"message": "Missing required fields."})
 
+    def validate_product_exists(self, product_id):
         try:
             Product.objects.get(id=product_id)
         except Product.DoesNotExist:
             raise ValidationError({"message": "The specified product does not exist."})
 
+    def validate_meal_exists(self, meal_pk):
         try:
             Meal.objects.get(pk=meal_pk)
         except Meal.DoesNotExist:
             raise ValidationError({"message": "The specified meal does not exist."})
 
+    def validate_serving_size(self, serving_size):
         if serving_size <= 0:
             raise ValidationError({"message": "Serving size must be a positive number."})
 
+    def validate(self, data):
+        self.validate_required_fields(data)
+        self.validate_product_exists(data.get('product_id'))
+        self.validate_meal_exists(data.get('meal_pk'))
+        self.validate_serving_size(data.get('serving_size'))
         return data
 
     def create(self, validated_data):
