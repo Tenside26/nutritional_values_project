@@ -6,7 +6,6 @@ from django_filters import rest_framework
 from .services import create_user_modified_product, partial_update_user_modified_product, sum_meal_nutritional_values
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class MealUserFilter(rest_framework.FilterSet):
