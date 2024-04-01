@@ -12,11 +12,11 @@ urlpatterns = [
     path('user-meals/<int:meal_pk>/modified-product/',
          ModifiedProductViewSet.as_view({
              'post': 'create',
-         }), name='modified-product-create'),
+         }), name='modified-product-list'),
 
     path('user-meals/<int:meal_pk>/modified-product/<int:pk>/',
          ModifiedProductViewSet.as_view({
              'patch': 'partial_update',
-         }), name='modified-product-partial-update'),
-
+             'delete': 'destroy',
+         }), name='modified-product-detail'),
 ]

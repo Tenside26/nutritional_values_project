@@ -3,9 +3,10 @@ from rest_framework.viewsets import ModelViewSet
 from calculator_app.models import Meal, UserModifiedProduct
 from api_app.serializers import MealSerializer, UserModifiedProductSerializer
 from django_filters import rest_framework
-from .services import create_user_modified_product, partial_update_user_modified_product
+from .services import create_user_modified_product, partial_update_user_modified_product, sum_meal_nutritional_values
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class MealUserFilter(rest_framework.FilterSet):
@@ -49,4 +50,19 @@ class ModifiedProductViewSet(ModelViewSet):
         else:
             return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def destroy(self, request, *args, **kwargs):
+        meal_pk = kwargs.get('meal_pk')
+        pk = kwargs.get('pk')
+
+        try:
+            modified_product = UserModifiedProduct.objects.get(meal__pk=meal_pk, pk=pk)
+        except UserModifiedProduct.DoesNotExist:
+            return Response({"message": "Product not found for the specified meal."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        modified_product.delete()
+        sum_meal_nutritional_values(meal_pk)
+
+        return Response({"message": "Product deleted successfully."},
+                        status=status.HTTP_204_NO_CONTENT)
 
