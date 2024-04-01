@@ -1,9 +1,9 @@
 
 from rest_framework.viewsets import ModelViewSet
-from calculator_app.models import Meal
+from calculator_app.models import Meal, UserModifiedProduct
 from api_app.serializers import MealSerializer, UserModifiedProductSerializer
 from django_filters import rest_framework
-from .services import create_user_modified_product
+from .services import create_user_modified_product, partial_update_user_modified_product
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -40,3 +40,13 @@ class ModifiedProductViewSet(ModelViewSet):
             return response
         else:
             return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def partial_update(self, request, *args, **kwargs):
+        response = partial_update_user_modified_product(request.data, kwargs.get('meal_pk'), kwargs.get('pk'))
+
+        if isinstance(response, Response):
+            return response
+        else:
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
