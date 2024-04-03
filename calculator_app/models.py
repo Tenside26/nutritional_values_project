@@ -25,9 +25,9 @@ class Meal(models.Model):
 
 class UserModifiedProduct(models.Model):
     name = models.CharField(default="string", blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="related_product")
-    meal = models.ForeignKey(Meal, on_delete=models.CASCADE, related_name="modified_product")
-    serving_size = models.IntegerField(default=100)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="related_product", blank=False)
+    meal = models.ForeignKey(Meal, on_delete=models.CASCADE, related_name="modified_product", blank=False)
+    serving_size = models.IntegerField(default=100, blank=False)
     calories = models.IntegerField(default=0, blank=True)
     protein = models.FloatField(default=0.0, blank=True)
     carbohydrate = models.FloatField(default=0.0, blank=True)

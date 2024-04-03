@@ -1,7 +1,7 @@
 
 from rest_framework.viewsets import ModelViewSet
 from calculator_app.models import Meal, UserModifiedProduct
-from api_app.serializers import MealSerializer, UserModifiedProductSerializer
+from api_app.serializers import MealSerializer, UserModifiedProductSerializerCreate, UserModifiedProductSerializerUpdate
 from django_filters import rest_framework
 from .services import create_user_modified_product, partial_update_user_modified_product, sum_meal_nutritional_values
 from rest_framework.response import Response
@@ -31,7 +31,12 @@ class MealUserViewSet(ModelViewSet):
 
 
 class ModifiedProductViewSet(ModelViewSet):
-    serializer_class = UserModifiedProductSerializer
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserModifiedProductSerializerCreate
+
+        elif self.action == 'partial_update':
+            return UserModifiedProductSerializerUpdate
 
     def create(self, request, *args, **kwargs):
         response = create_user_modified_product(request.data, kwargs.get('meal_pk'))
