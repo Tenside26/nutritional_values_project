@@ -1,31 +1,72 @@
-from django.shortcuts import render
-from django.http import HttpResponseServerError
-import requests
+
+from rest_framework.viewsets import ModelViewSet
+from calculator_app.models import Meal, UserModifiedProduct
+from api_app.serializers import MealSerializer, UserModifiedProductSerializerCreate, UserModifiedProductSerializerUpdate
+from django_filters import rest_framework
+from .services import create_user_modified_product, partial_update_user_modified_product, sum_meal_nutritional_values
+from rest_framework.response import Response
+from rest_framework import status
 
 
-def calculator_page(request):
+class MealUserFilter(rest_framework.FilterSet):
+    date_created_gte = rest_framework.DateFilter(field_name='date_created', lookup_expr='gte')
+    date_created_lte = rest_framework.DateFilter(field_name='date_created', lookup_expr='lte')
+    title = rest_framework.CharFilter(field_name='title', lookup_expr='icontains')
+    product_name = rest_framework.CharFilter(field_name='product__name', lookup_expr='icontains')
 
-    template = "calculator.html"
-    api_url = "http://127.0.0.1:8000/api/products"
+    class Meta:
+        model = Meal
+        fields = ['title', 'date_created_gte', 'date_created_lte', 'product_name']
 
-    try:
-        response = requests.get(api_url)
 
-        if response.status_code == 200:
-            api_data = response.json()
+class MealUserViewSet(ModelViewSet):
+    serializer_class = MealSerializer
+    filter_backends = [rest_framework.DjangoFilterBackend]
+    filterset_class = MealUserFilter
 
-            return render(request, template, {'api_data': api_data})
+    def get_queryset(self):
+        queryset = Meal.objects.filter(user=self.request.user)
+
+        return queryset
+
+
+class ModifiedProductViewSet(ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserModifiedProductSerializerCreate
+
+        elif self.action == 'partial_update':
+            return UserModifiedProductSerializerUpdate
+
+    def create(self, request, *args, **kwargs):
+        response = create_user_modified_product(request.data, kwargs.get('meal_pk'))
+
+        if isinstance(response, Response):
+            return response
         else:
-            return HttpResponseServerError(f"Error fetching data from API. Status code: {response.status_code}")
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    except requests.exceptions.RequestException as e:
+    def partial_update(self, request, *args, **kwargs):
+        response = partial_update_user_modified_product(request.data, kwargs.get('meal_pk'), kwargs.get('pk'))
 
-        return HttpResponseServerError(f"Error fetching data from API: {e}")
+        if isinstance(response, Response):
+            return response
+        else:
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    except ValueError as e:
+    def destroy(self, request, *args, **kwargs):
+        meal_pk = kwargs.get('meal_pk')
+        pk = kwargs.get('pk')
 
-        return HttpResponseServerError(f"Error parsing JSON data: {e}")
+        try:
+            modified_product = UserModifiedProduct.objects.get(meal__pk=meal_pk, pk=pk)
+        except UserModifiedProduct.DoesNotExist:
+            return Response({"message": "Product not found for the specified meal."},
+                            status=status.HTTP_404_NOT_FOUND)
 
-    except Exception as e:
+        modified_product.delete()
+        sum_meal_nutritional_values(meal_pk)
 
-        return HttpResponseServerError(f"An unexpected error occurred: {e}")
+        return Response({"message": "Product deleted successfully."},
+                        status=status.HTTP_204_NO_CONTENT)
+
