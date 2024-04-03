@@ -142,21 +142,17 @@ class MealSerializerTests(TestCase):
     def setUpTestData(cls):
         cls.fake = Faker()
 
-        cls.product_data = ProductFactory()
         cls.user_data = CustomUserFactory()
-        cls.meal_data = MealFactory(user=cls.user_data, product=cls.product_data)
-        cls.meal_data.product.set([cls.product_data])
+        cls.meal_data = MealFactory(user=cls.user_data)
 
-        cls.product_serializer = ProductSerializer(instance=cls.product_data)
         cls.user_serializer = CustomUserSerializer(instance=cls.user_data)
         cls.meal_serializer = MealSerializer(instance=cls.meal_data)
 
     def test_meal_serialization(self):
-        serialized_date = timezone.datetime.fromisoformat(self.meal_serializer.data['date']).replace(tzinfo=pytz.UTC)
-        expected_date = self.meal_data.date.replace(tzinfo=pytz.UTC)
+        serialized_date = timezone.datetime.fromisoformat(self.meal_serializer.data['date_created']).replace(tzinfo=pytz.UTC)
+        expected_date = self.meal_data.date_created.replace(tzinfo=pytz.UTC)
 
         self.assertEqual(self.meal_serializer.data['user'], self.user_serializer.data)
-        self.assertEqual(self.meal_serializer.data['product'], [self.product_serializer.data])
         self.assertEqual(serialized_date, expected_date)
 
     def test_meal_deserialization(self):
@@ -165,11 +161,8 @@ class MealSerializerTests(TestCase):
     def test_meal_serialization_incorrect_user_data(self):
         self.assertNotEqual(self.meal_serializer.data['user']["username"], self.fake.user_name())
 
-    def test_meal_serialization_incorrect_product_data(self):
-        self.assertNotEqual(self.meal_serializer.data['product'][0]["name"], self.fake.word())
-
     def test_meal_serialization_incorrect_date_data(self):
-        self.assertNotEqual(self.meal_serializer.data['date'], self.fake.date_time_this_decade())
+        self.assertNotEqual(self.meal_serializer.data['date_created'], self.fake.date_time_this_decade())
 
     def test_meal_serialization_missing_data(self):
         serialized_data = MealSerializer(data={})

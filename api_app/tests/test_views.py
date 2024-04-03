@@ -154,11 +154,9 @@ class MealViewsTests(TestCase):
         self.client = APIClient()
         self.fake = Faker()
 
-        self.product = ProductFactory()
         self.user = CustomUserFactory()
         self.token = Token.objects.create(user=self.user)
         self.meal = MealFactory(user=self.user)
-        self.meal.product.set([self.product])
 
         self.detail_url = reverse('meal-detail', args=[self.meal.pk])
         self.list_url = reverse('meal-list')
