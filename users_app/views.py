@@ -31,7 +31,6 @@ class RegisterAPIView(APIView):
         if not serializer.is_valid():
             return Response(status=status.HTTP_202_ACCEPTED)
 
-        elif serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
+        serializer.save()
+        return Response(status=status.HTTP_202_ACCEPTED)
 

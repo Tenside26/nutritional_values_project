@@ -1,8 +1,6 @@
 from django.db.models import Sum
 from api_app.serializers import UserModifiedProductSerializerCreate, UserModifiedProductSerializerUpdate
 from .models import Meal, UserModifiedProduct
-from rest_framework.response import Response
-from rest_framework import status
 
 
 def calculate_nutritional_values_per_serving_size(instance):
@@ -32,17 +30,16 @@ def sum_meal_nutritional_values(meal_id):
 
 
 def create_user_modified_product(request_data, meal_id):
-    request_data["meal_pk"] = meal_id
+    request_data["meal_id"] = meal_id
     serializer = UserModifiedProductSerializerCreate(data=request_data)
 
     if not serializer.is_valid():
-        errors = serializer.errors
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return False, serializer.errors
 
     serializer.save()
     calculate_nutritional_values_per_serving_size(serializer.instance)
     sum_meal_nutritional_values(meal_id)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return serializer.data, False
 
 
 def partial_update_user_modified_product(request_data, meal_id, modified_product_id):
@@ -50,10 +47,9 @@ def partial_update_user_modified_product(request_data, meal_id, modified_product
     serializer = UserModifiedProductSerializerUpdate(data=request_data, instance=existing_product, partial=True)
 
     if not serializer.is_valid():
-        errors = serializer.errors
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return False, serializer.errors
 
     serializer.save()
     calculate_nutritional_values_per_serving_size(serializer.instance)
     sum_meal_nutritional_values(meal_id)
-    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    return serializer.data, False

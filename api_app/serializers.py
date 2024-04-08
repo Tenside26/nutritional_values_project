@@ -44,121 +44,82 @@ class MealSerializer(serializers.ModelSerializer):
 
 
 class UserModifiedProductSerializerCreate(serializers.ModelSerializer):
-    product_id = serializers.IntegerField(write_only=True)
-    meal_pk = serializers.IntegerField(write_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+    meal_id = serializers.PrimaryKeyRelatedField(queryset=Meal.objects.all(), write_only=True)
 
     class Meta:
         model = UserModifiedProduct
         fields = ("pk",
                   "name",
                   "product_id",
-                  "meal_pk",
+                  "meal_id",
                   "serving_size",
                   "calories",
                   "protein",
                   "carbohydrate",
                   "fat")
 
-    def validate_product_exists(self, product_id):
-        try:
-            Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            raise serializers.ValidationError({"message": "The specified product does not exist."})
-
-        return product_id
-
-    def validate_meal_exists(self, meal_pk):
-        try:
-            Meal.objects.get(pk=meal_pk)
-        except Meal.DoesNotExist:
-            raise serializers.ValidationError({"message": "The specified meal does not exist."})
-
-        return meal_pk
-
     def validate_serving_size(self, serving_size):
         if serving_size <= 0:
             raise serializers.ValidationError({"message": "Serving size must be a positive number."})
 
+        elif not serving_size:
+            raise serializers.ValidationError({"message": "Serving size field must be filled."})
+
         return serving_size
 
     def validate(self, data):
-        self.validate_product_exists(data.get('product_id'))
-        self.validate_meal_exists(data.get('meal_pk'))
         self.validate_serving_size(data.get('serving_size'))
 
         return data
 
     def create(self, validated_data):
-        product_id = validated_data.pop('product_id')
-        meal_pk = validated_data.pop('meal_pk')
-
-        product = Product.objects.get(id=product_id)
-        meal = Meal.objects.get(pk=meal_pk)
+        product = validated_data.pop('product_id')
+        meal = validated_data.pop('meal_id')
 
         instance = UserModifiedProduct.objects.create(product=product, meal=meal, **validated_data)
         return instance
 
 
 class UserModifiedProductSerializerUpdate(serializers.ModelSerializer):
-    product_id = serializers.IntegerField(write_only=True)
-    meal_pk = serializers.IntegerField(write_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+    meal_id = serializers.PrimaryKeyRelatedField(queryset=Meal.objects.all(), write_only=True)
 
     class Meta:
         model = UserModifiedProduct
         fields = ("pk",
                   "name",
                   "product_id",
-                  "meal_pk",
+                  "meal_id",
                   "serving_size",
                   "calories",
                   "protein",
                   "carbohydrate",
                   "fat")
 
-    def validate_modified_product_db_product_exists(self):
-        existing_product = self.instance
-
-        if existing_product and not existing_product.product_id:
-            raise serializers.ValidationError({"message": "modified_product does not have product_id set."})
-
-        elif not existing_product:
-            raise serializers.ValidationError({"message": "modified_product does not exist."})
-
-        return existing_product.product_id
-
-    def validate_modified_product_meal_exists(self):
-        existing_product = self.instance
-
-        if existing_product and not existing_product.meal_id:
-            raise serializers.ValidationError({"message": "modified_product does not have meal_pk set."})
-
-        elif not existing_product:
-            raise serializers.ValidationError({"message": "modified_product does not exist."})
-
-        return existing_product.meal_id
-
     def validate_serving_size(self, serving_size):
         if serving_size <= 0:
             raise serializers.ValidationError({"message": "Serving size must be a positive number."})
+
+        elif not serving_size:
+            raise serializers.ValidationError({"message": "Serving size field must be filled."})
 
         return serving_size
 
     def validate(self, data):
         self.validate_serving_size(data.get('serving_size'))
-        self.validate_modified_product_db_product_exists()
-        self.validate_modified_product_meal_exists()
 
         return data
 
     def update(self, instance, validated_data):
-
-        if instance.product_id and instance.meal_id:
-            instance.product = Product.objects.get(id=instance.product_id)
-            instance.meal = Meal.objects.get(pk=instance.meal_id)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
+        instance.name = validated_data.get('name', instance.name)
+        instance.product_id = validated_data.get('product_id', instance.product_id)
+        instance.meal_id = validated_data.get('meal_id', instance.meal_id)
+        instance.serving_size = validated_data.get('serving_size', instance.serving_size)
+        instance.calories = validated_data.get('calories', instance.calories)
+        instance.protein = validated_data.get('protein', instance.protein)
+        instance.carbohydrate = validated_data.get('carbohydrate', instance.carbohydrate)
+        instance.fat = validated_data.get('fat', instance.fat)
         instance.save()
         return instance
 

@@ -39,23 +39,31 @@ class ModifiedProductViewSet(ModelViewSet):
             return UserModifiedProductSerializerUpdate
 
     def create(self, request, *args, **kwargs):
-        response = create_user_modified_product(request.data, kwargs.get('meal_pk'))
+        response_data, errors = create_user_modified_product(request.data, kwargs.get('meal_id'))
 
-        if isinstance(response, Response):
-            return response
-        else:
-            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif response_data:
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def partial_update(self, request, *args, **kwargs):
-        response = partial_update_user_modified_product(request.data, kwargs.get('meal_pk'), kwargs.get('pk'))
+        response_data, errors = partial_update_user_modified_product(request.data,
+                                                                     kwargs.get('meal_id'),
+                                                                     kwargs.get('pk'))
 
-        if isinstance(response, Response):
-            return response
-        else:
-            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif response_data:
+            return Response(response_data, status=status.HTTP_202_ACCEPTED)
+
+        return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
-        meal_pk = kwargs.get('meal_pk')
+        meal_pk = kwargs.get('meal_id')
         pk = kwargs.get('pk')
 
         try:
